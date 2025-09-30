@@ -80,6 +80,8 @@ class ProjectJSONManager:
             "deploy_server": "",
             "db_name": "",
             "backup_taken": False,
+            "backup_location": "",
+            "environment": "QA",
             "components": {
                 "frontend": {
                     "enabled": True,

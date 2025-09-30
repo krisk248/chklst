@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import QApplication
 from utils.json_manager import ProjectJSONManager
 from utils.excel_manager import ExcelManager
 from utils.integration_formatter import JiraFormatter, TeamsFormatter
+from utils.settings_manager import get_setting
 
 
 class TimePickerDialog(QDialog):
@@ -386,6 +387,10 @@ class SimpleDeploymentForm(QWidget):
         # Deployed By
         self.deployed_by = QLineEdit()
         self.deployed_by.setPlaceholderText("Enter your name")
+        # Auto-fill from settings
+        default_deployed_by = get_setting('deployed_by_default', '')
+        if default_deployed_by:
+            self.deployed_by.setText(default_deployed_by)
         form_layout.addRow("Deployed By:", self.deployed_by)
         
         group.setLayout(form_layout)
@@ -683,6 +688,11 @@ class SimpleDeploymentForm(QWidget):
         self.deploy_success.setChecked(True)
         self.notes.clear()
         # Keep project, component, and deployed_by for convenience
+        # Re-apply default deployed_by from settings if it was cleared
+        if not self.deployed_by.text():
+            default_deployed_by = get_setting('deployed_by_default', '')
+            if default_deployed_by:
+                self.deployed_by.setText(default_deployed_by)
 
 
 if __name__ == '__main__':

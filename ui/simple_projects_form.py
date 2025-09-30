@@ -93,10 +93,14 @@ class SimpleProjectsTab(QWidget):
         
         self.db_name_edit = QLineEdit()
         project_layout.addRow("DB Name:", self.db_name_edit)
-        
+
         self.backup_taken_check = QCheckBox()
         project_layout.addRow("Backup Taken:", self.backup_taken_check)
-        
+
+        self.backup_location_edit = QLineEdit()
+        self.backup_location_edit.setPlaceholderText("/backup/project_name/db")
+        project_layout.addRow("Backup Location:", self.backup_location_edit)
+
         layout.addWidget(project_group)
         
         # Components Groups - Direct editing for each
@@ -157,6 +161,7 @@ class SimpleProjectsTab(QWidget):
         self.deploy_server_edit.setEnabled(enabled)
         self.db_name_edit.setEnabled(enabled)
         self.backup_taken_check.setEnabled(enabled)
+        self.backup_location_edit.setEnabled(enabled)
         
         # Component fields
         for component in ['frontend', 'backend', 'backoffice']:
@@ -206,6 +211,7 @@ class SimpleProjectsTab(QWidget):
         self.deploy_server_edit.setText(self.current_project_data.get('deploy_server', ''))
         self.db_name_edit.setText(self.current_project_data.get('db_name', ''))
         self.backup_taken_check.setChecked(self.current_project_data.get('backup_taken', False))
+        self.backup_location_edit.setText(self.current_project_data.get('backup_location', ''))
         
         # Load component data
         components = self.current_project_data.get('components', {})
@@ -244,6 +250,7 @@ class SimpleProjectsTab(QWidget):
             "deploy_server": self.deploy_server_edit.text().strip(),
             "db_name": self.db_name_edit.text().strip(),
             "backup_taken": self.backup_taken_check.isChecked(),
+            "backup_location": self.backup_location_edit.text().strip(),
             "components": {}
         }
         
