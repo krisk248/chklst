@@ -1,0 +1,36 @@
+{
+  "project_name": "MBANK",
+  "project_url": "",
+  "build_server": "192.168.1.149",
+  "deploy_server": "",
+  "db_name": "MBANK_DB",
+  "backup_taken": false,
+  "components": {
+    "frontend": {
+      "enabled": false,
+      "component_name": "MBANK Frontend",
+      "developer_name": "Frontend Dev",
+      "vcs_type": "Git",
+      "vcs_url": "",
+      "build_command": ""
+    },
+    "backend": {
+      "enabled": false,
+      "component_name": "MBANK Backend",
+      "developer_name": "Backend Dev",
+      "vcs_type": "Git",
+      "vcs_url": "",
+      "build_command": ""
+    },
+    "backoffice": {
+      "enabled": false,
+      "component_name": "",
+      "developer_name": "Backoffice Dev",
+      "vcs_type": "",
+      "vcs_url": "",
+      "build_command": ""
+    }
+  },
+  "environment": "QA",
+  "backup_location": "/backup/mbank/db"
+}

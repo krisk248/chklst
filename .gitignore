@@ -1,0 +1,53 @@
+# Claude Code configuration
+.claude/
+.serena/
+
+# Unwanted folders
+unwanted/
+
+# Generated reports and data
+reports/
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Pipenv
+.pipenv/
+
+# CSV exports (if you have test data)
+exports/
+*.csv
+
+# Logs
+*.log
+logs/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+.temp/
