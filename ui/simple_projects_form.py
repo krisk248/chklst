@@ -85,10 +85,7 @@ class SimpleProjectsTab(QWidget):
         # Project fields - direct editing (NO AUTO-SAVE)
         self.project_name_edit = QLineEdit()
         project_layout.addRow("Project Name:", self.project_name_edit)
-        
-        self.project_url_edit = QLineEdit()
-        project_layout.addRow("Project URL:", self.project_url_edit)
-        
+
         self.build_server_edit = QLineEdit()
         project_layout.addRow("Build Server:", self.build_server_edit)
         
@@ -125,28 +122,35 @@ class SimpleProjectsTab(QWidget):
         """Create a component group with direct editing fields"""
         group = QGroupBox(display_name)
         layout = QFormLayout(group)
-        
+
         # Enable checkbox (NO AUTO-SAVE)
         enabled_check = QCheckBox(f"Enable {display_name}")
         enabled_check.stateChanged.connect(lambda state, key=component_key: self.on_component_enabled_changed(key, state))
         layout.addRow(enabled_check)
-        
+
         # Component fields (NO AUTO-SAVE)
         name_edit = QLineEdit()
         layout.addRow("Component Name:", name_edit)
-        
+
         dev_edit = QLineEdit()
         layout.addRow("Developer Name:", dev_edit)
-        
+
         vcs_type_edit = QLineEdit()
         layout.addRow("VCS Type:", vcs_type_edit)
-        
+
         vcs_url_edit = QLineEdit()
         layout.addRow("VCS URL:", vcs_url_edit)
-        
+
         build_cmd_edit = QLineEdit()
         layout.addRow("Build Command:", build_cmd_edit)
-        
+
+        # Component URL field (only for frontend and backoffice)
+        component_url_edit = None
+        if component_key in ['frontend', 'backoffice']:
+            component_url_edit = QLineEdit()
+            component_url_edit.setPlaceholderText("https://example.com/...")
+            layout.addRow("Component URL:", component_url_edit)
+
         # Store references for easy access
         setattr(self, f"{component_key}_enabled_check", enabled_check)
         setattr(self, f"{component_key}_name_edit", name_edit)
@@ -154,14 +158,15 @@ class SimpleProjectsTab(QWidget):
         setattr(self, f"{component_key}_vcs_type_edit", vcs_type_edit)
         setattr(self, f"{component_key}_vcs_url_edit", vcs_url_edit)
         setattr(self, f"{component_key}_build_cmd_edit", build_cmd_edit)
-        
+        if component_url_edit:
+            setattr(self, f"{component_key}_component_url_edit", component_url_edit)
+
         parent_layout.addWidget(group)
         
     def set_form_enabled(self, enabled):
         """Enable/disable all form elements"""
         # Project fields
         self.project_name_edit.setEnabled(enabled)
-        self.project_url_edit.setEnabled(enabled)
         self.build_server_edit.setEnabled(enabled)
         self.deploy_server_edit.setEnabled(enabled)
         self.db_name_edit.setEnabled(enabled)
@@ -176,12 +181,16 @@ class SimpleProjectsTab(QWidget):
     def set_component_fields_enabled(self, component_key, enabled):
         """Enable/disable component fields based on enabled checkbox"""
         is_component_enabled = enabled and getattr(self, f"{component_key}_enabled_check").isChecked()
-        
+
         getattr(self, f"{component_key}_name_edit").setEnabled(is_component_enabled)
         getattr(self, f"{component_key}_dev_edit").setEnabled(is_component_enabled)
         getattr(self, f"{component_key}_vcs_type_edit").setEnabled(is_component_enabled)
         getattr(self, f"{component_key}_vcs_url_edit").setEnabled(is_component_enabled)
         getattr(self, f"{component_key}_build_cmd_edit").setEnabled(is_component_enabled)
+
+        # Enable/disable component URL field if it exists (frontend and backoffice only)
+        if hasattr(self, f"{component_key}_component_url_edit"):
+            getattr(self, f"{component_key}_component_url_edit").setEnabled(is_component_enabled)
         
     def refresh_projects(self):
         """Refresh project list from JSON files"""
@@ -211,29 +220,32 @@ class SimpleProjectsTab(QWidget):
             
         # Load project fields
         self.project_name_edit.setText(self.current_project_data.get('project_name', ''))
-        self.project_url_edit.setText(self.current_project_data.get('project_url', ''))
         self.build_server_edit.setText(self.current_project_data.get('build_server', '192.168.1.149'))
         self.deploy_server_edit.setText(self.current_project_data.get('deploy_server', ''))
         self.db_name_edit.setText(self.current_project_data.get('db_name', ''))
         self.environment_edit.setText(self.current_project_data.get('environment', 'QA'))
         self.backup_location_edit.setText(self.current_project_data.get('backup_location', ''))
-        
+
         # Load component data
         components = self.current_project_data.get('components', {})
         for component_key in ['frontend', 'backend', 'backoffice']:
             comp_data = components.get(component_key, {})
-            
+
             # Set checkbox and enable/disable fields
             enabled_check = getattr(self, f"{component_key}_enabled_check")
             enabled_check.setChecked(comp_data.get('enabled', False))
-            
+
             # Load component fields
             getattr(self, f"{component_key}_name_edit").setText(comp_data.get('component_name', ''))
             getattr(self, f"{component_key}_dev_edit").setText(comp_data.get('developer_name', ''))
             getattr(self, f"{component_key}_vcs_type_edit").setText(comp_data.get('vcs_type', 'Git'))
             getattr(self, f"{component_key}_vcs_url_edit").setText(comp_data.get('vcs_url', ''))
             getattr(self, f"{component_key}_build_cmd_edit").setText(comp_data.get('build_command', ''))
-            
+
+            # Load component URL if field exists (frontend and backoffice only)
+            if hasattr(self, f"{component_key}_component_url_edit"):
+                getattr(self, f"{component_key}_component_url_edit").setText(comp_data.get('component_url', ''))
+
             # Enable/disable component fields based on checkbox
             self.set_component_fields_enabled(component_key, True)
             
@@ -246,11 +258,10 @@ class SimpleProjectsTab(QWidget):
         """Collect all form data into project structure"""
         if not self.current_project_data:
             return None
-            
+
         # Get project-level data from form
         form_data = {
             "project_name": self.project_name_edit.text().strip(),
-            "project_url": self.project_url_edit.text().strip(),
             "build_server": self.build_server_edit.text().strip(),
             "deploy_server": self.deploy_server_edit.text().strip(),
             "db_name": self.db_name_edit.text().strip(),
@@ -258,7 +269,7 @@ class SimpleProjectsTab(QWidget):
             "backup_location": self.backup_location_edit.text().strip(),
             "components": {}
         }
-        
+
         # Get component data from form
         for component_key in ['frontend', 'backend', 'backoffice']:
             enabled_check = getattr(self, f"{component_key}_enabled_check")
@@ -267,8 +278,8 @@ class SimpleProjectsTab(QWidget):
             vcs_type_edit = getattr(self, f"{component_key}_vcs_type_edit")
             vcs_url_edit = getattr(self, f"{component_key}_vcs_url_edit")
             build_cmd_edit = getattr(self, f"{component_key}_build_cmd_edit")
-            
-            form_data["components"][component_key] = {
+
+            component_data = {
                 "enabled": enabled_check.isChecked(),
                 "component_name": name_edit.text().strip(),
                 "developer_name": dev_edit.text().strip(),
@@ -276,7 +287,14 @@ class SimpleProjectsTab(QWidget):
                 "vcs_url": vcs_url_edit.text().strip(),
                 "build_command": build_cmd_edit.text().strip()
             }
-        
+
+            # Add component URL if field exists (frontend and backoffice only)
+            if hasattr(self, f"{component_key}_component_url_edit"):
+                component_url_edit = getattr(self, f"{component_key}_component_url_edit")
+                component_data["component_url"] = component_url_edit.text().strip()
+
+            form_data["components"][component_key] = component_data
+
         return form_data
         
     def add_project(self):

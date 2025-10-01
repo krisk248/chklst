@@ -251,11 +251,11 @@ class PostSaveDialog(QDialog):
 
         if self.copy_jira_check.isChecked():
             jira_msg = JiraFormatter.format(self.deployment_data)
-            messages.append("=== JIRA FORMAT ===\n" + jira_msg)
+            messages.append(jira_msg)
 
         if self.copy_teams_check.isChecked():
             teams_msg = TeamsFormatter.format(self.deployment_data)
-            messages.append("=== TEAMS FORMAT ===\n" + teams_msg)
+            messages.append(teams_msg)
 
         if messages:
             combined_message = "\n\n".join(messages)
@@ -491,10 +491,10 @@ class SimpleDeploymentForm(QWidget):
         
         # Timestamp with time picker
         timestamp_layout = QHBoxLayout()
-        
+
         self.timestamp_edit = QDateTimeEdit()
         self.timestamp_edit.setDateTime(QDateTime.currentDateTime())
-        self.timestamp_edit.setDisplayFormat("yyyy-MM-dd hh:mm:ss")
+        self.timestamp_edit.setDisplayFormat("dd-MMM-yyyy h:mmAP")
         self.timestamp_edit.setCalendarPopup(True)
         timestamp_layout.addWidget(self.timestamp_edit)
         
@@ -673,6 +673,27 @@ class SimpleDeploymentForm(QWidget):
         if dialog.exec_() == QDialog.Accepted:
             self.timestamp_edit.setDateTime(dialog.get_datetime())
 
+    def validate_patch_id(self) -> bool:
+        """
+        Validate Patch ID and show warning if missing
+
+        Returns:
+            bool: True if user wants to continue, False if they want to cancel
+        """
+        patch_id = self.jira_patch.text().strip()
+        if not patch_id:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setWindowTitle("Patch ID Missing")
+            msg.setText("⚠️ Patch ID is missing!")
+            msg.setInformativeText("You haven't entered a JIRA Patch ID.\n\nDo you want to continue anyway?")
+            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            msg.setDefaultButton(QMessageBox.No)
+
+            result = msg.exec_()
+            return result == QMessageBox.Yes
+        return True
+
     def get_current_deployment_data(self):
         """
         Extract current deployment data from form without saving
@@ -702,12 +723,16 @@ class SimpleDeploymentForm(QWidget):
         elif self.backoffice_radio.isChecked():
             component_name = self.current_component_data.get('component_name', 'Backoffice')
 
+        # Get component URL if available
+        component_url = self.current_component_data.get('component_url', '') if self.current_component_data else ''
+
         # Prepare deployment data
         deployment_data = {
             'jira_patch_id': self.jira_patch.text().strip() or 'N/A',
-            'timestamp': self.timestamp_edit.dateTime().toString("yyyy-MM-dd hh:mm:ss"),
+            'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
             'project_name': self.project_combo.currentText(),
             'component_name': component_name,
+            'component_url': component_url,
             'environment': self.auto_environment.text(),
             'vcs_url': self.auto_vcs_url.text(),
             'developer_name': self.auto_developer.text(),
@@ -790,6 +815,10 @@ class SimpleDeploymentForm(QWidget):
                 QMessageBox.warning(self, "Validation", "Please enter 'Deployed By' name")
                 return
 
+            # Validate Patch ID - ask user if they want to continue without it
+            if not self.validate_patch_id():
+                return
+
             # Get component name
             component_name = ""
             if self.frontend_radio.isChecked():
@@ -799,12 +828,16 @@ class SimpleDeploymentForm(QWidget):
             elif self.backoffice_radio.isChecked():
                 component_name = self.current_component_data.get('component_name', 'Backoffice')
 
+            # Get component URL if available
+            component_url = self.current_component_data.get('component_url', '') if self.current_component_data else ''
+
             # Prepare deployment data
             deployment_data = {
                 'jira_patch_id': self.jira_patch.text().strip() or 'N/A',
-                'timestamp': self.timestamp_edit.dateTime().toString("yyyy-MM-dd hh:mm:ss"),
+                'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
                 'project_name': self.project_combo.currentText(),
                 'component_name': component_name,
+                'component_url': component_url,
                 'environment': self.auto_environment.text(),
                 'vcs_url': self.auto_vcs_url.text(),
                 'developer_name': self.auto_developer.text(),

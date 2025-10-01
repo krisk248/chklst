@@ -25,6 +25,7 @@ class JiraFormatter:
         timestamp = deployment_data.get('timestamp', '')
         project_name = deployment_data.get('project_name', '')
         component_name = deployment_data.get('component_name', '')
+        component_url = deployment_data.get('component_url', '')
         environment = deployment_data.get('environment', 'QA')
         build_server = deployment_data.get('build_server', '')
         deploy_server = deployment_data.get('deploy_server', '')
@@ -57,6 +58,10 @@ class JiraFormatter:
         table.append(f"| Project | {project_name} - {component_name} |")
         table.append(f"| Environment | {environment} |")
         table.append(f"| Timestamp | {timestamp} |")
+
+        if component_url:
+            table.append(f"| Component URL | {component_url} |")
+
         table.append(f"| Build Server | {build_server} |")
         table.append(f"| Build Status | {build_status_text} |")
         table.append(f"| Deploy Server | {deploy_server} |")
@@ -98,6 +103,7 @@ class TeamsFormatter:
         timestamp = deployment_data.get('timestamp', '')
         project_name = deployment_data.get('project_name', '')
         component_name = deployment_data.get('component_name', '')
+        component_url = deployment_data.get('component_url', '')
         environment = deployment_data.get('environment', 'QA')
         build_server = deployment_data.get('build_server', '')
         deploy_server = deployment_data.get('deploy_server', '')
@@ -132,6 +138,10 @@ class TeamsFormatter:
         # Project and component info
         message.append(f"• Project: {project_name} - {component_name}")
         message.append(f"• Environment: {environment}")
+
+        # Component URL (if available)
+        if component_url:
+            message.append(f"• URL: {component_url}")
 
         # Build information
         message.append(f"• Build Server: {build_server}")

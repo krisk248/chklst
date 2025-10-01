@@ -75,7 +75,6 @@ class ProjectJSONManager:
     def create_default_project_structure(self, project_name: str, project_url: str = "") -> Dict[str, Any]:
         return {
             "project_name": project_name,
-            "project_url": project_url,
             "build_server": "192.168.1.149",
             "deploy_server": "",
             "db_name": "",
@@ -88,7 +87,8 @@ class ProjectJSONManager:
                     "developer_name": "",
                     "vcs_type": "Git",
                     "vcs_url": "",
-                    "build_command": ""
+                    "build_command": "",
+                    "component_url": ""
                 },
                 "backend": {
                     "enabled": True,
@@ -104,7 +104,8 @@ class ProjectJSONManager:
                     "developer_name": "",
                     "vcs_type": "",
                     "vcs_url": "",
-                    "build_command": ""
+                    "build_command": "",
+                    "component_url": ""
                 }
             }
         }
