@@ -68,7 +68,7 @@ class SimpleReportsViewer(QWidget):
         title = QLabel("📊 DEPLOYMENT REPORTS")
         title.setAlignment(Qt.AlignCenter)
         title.setFont(QFont("Arial", 16, QFont.Bold))
-        title.setStyleSheet("color: #2c3e50; margin: 10px;")
+        title.setStyleSheet("color: #ecf0f1; margin: 10px;")
         layout.addWidget(title)
         
         # Controls section
@@ -172,11 +172,13 @@ class SimpleReportsViewer(QWidget):
         self.stats_text.setMaximumHeight(200)
         self.stats_text.setStyleSheet("""
             QTextEdit {
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
+                background-color: #2b2b2b;
+                border: 2px solid #555;
                 border-radius: 5px;
                 padding: 10px;
                 font-family: monospace;
+                color: #ecf0f1;
+                font-size: 13px;
             }
         """)
         layout.addWidget(self.stats_text)
@@ -208,12 +210,25 @@ class SimpleReportsViewer(QWidget):
         self.deployments_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.deployments_table.setStyleSheet("""
             QTableWidget {
-                gridline-color: #ddd;
-                background-color: white;
+                gridline-color: #555;
+                background-color: #2b2b2b;
+                color: #ecf0f1;
+                alternate-background-color: #333;
+            }
+            QTableWidget::item {
+                padding: 5px;
+                border: none;
             }
             QTableWidget::item:selected {
                 background-color: #3498db;
                 color: white;
+            }
+            QHeaderView::section {
+                background-color: #34495e;
+                color: white;
+                padding: 8px;
+                border: 1px solid #555;
+                font-weight: bold;
             }
         """)
         
@@ -245,36 +260,69 @@ class SimpleReportsViewer(QWidget):
         # Component breakdown
         component_group = QGroupBox("Component Breakdown")
         component_layout = QVBoxLayout()
-        
+
         self.component_stats = QTextEdit()
         self.component_stats.setReadOnly(True)
         self.component_stats.setMaximumHeight(150)
+        self.component_stats.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                border: 2px solid #555;
+                border-radius: 5px;
+                padding: 10px;
+                font-family: monospace;
+                color: #ecf0f1;
+                font-size: 13px;
+            }
+        """)
         component_layout.addWidget(self.component_stats)
-        
+
         component_group.setLayout(component_layout)
         layout.addWidget(component_group)
-        
+
         # Project breakdown
         project_group = QGroupBox("Project Breakdown")
         project_layout = QVBoxLayout()
-        
+
         self.project_stats = QTextEdit()
         self.project_stats.setReadOnly(True)
         self.project_stats.setMaximumHeight(150)
+        self.project_stats.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                border: 2px solid #555;
+                border-radius: 5px;
+                padding: 10px;
+                font-family: monospace;
+                color: #ecf0f1;
+                font-size: 13px;
+            }
+        """)
         project_layout.addWidget(self.project_stats)
-        
+
         project_group.setLayout(project_layout)
         layout.addWidget(project_group)
-        
+
         # Success/Failure analysis
         success_group = QGroupBox("Success/Failure Analysis")
         success_layout = QVBoxLayout()
-        
+
         self.success_stats = QTextEdit()
         self.success_stats.setReadOnly(True)
         self.success_stats.setMaximumHeight(150)
+        self.success_stats.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                border: 2px solid #555;
+                border-radius: 5px;
+                padding: 10px;
+                font-family: monospace;
+                color: #ecf0f1;
+                font-size: 13px;
+            }
+        """)
         success_layout.addWidget(self.success_stats)
-        
+
         success_group.setLayout(success_layout)
         layout.addWidget(success_group)
         
@@ -288,32 +336,32 @@ class SimpleReportsViewer(QWidget):
         card.setFrameStyle(QFrame.StyledPanel)
         card.setStyleSheet(f"""
             QFrame {{
-                background-color: white;
-                border: 1px solid #ddd;
+                background-color: #2b2b2b;
+                border: 2px solid #555;
                 border-radius: 8px;
-                padding: 10px;
+                padding: 15px;
             }}
         """)
-        
+
         layout = QVBoxLayout()
-        
+
         title_label = QLabel(title)
         title_label.setAlignment(Qt.AlignCenter)
         title_label.setFont(QFont("Arial", 10))
-        title_label.setStyleSheet("color: #666;")
-        
+        title_label.setStyleSheet("color: #bdc3c7;")
+
         value_label = QLabel(value)
         value_label.setAlignment(Qt.AlignCenter)
         value_label.setFont(QFont("Arial", 24, QFont.Bold))
         value_label.setStyleSheet(f"color: {color};")
-        
+
         layout.addWidget(title_label)
         layout.addWidget(value_label)
         card.setLayout(layout)
-        
+
         # Store value label for updates
         setattr(card, 'value_label', value_label)
-        
+
         return card
         
     def on_month_changed(self, month):
@@ -406,24 +454,24 @@ Active Projects: {project_count}
             
             for col, item_text in enumerate(items):
                 item = QTableWidgetItem(str(item_text))
-                
-                # Color code status columns
+
+                # Color code status columns with dark theme colors
                 if col == 6:  # Build Status
                     if item_text == 'Success':
-                        item.setBackground(QColor("#d4edda"))
-                        item.setForeground(QColor("#155724"))
+                        item.setBackground(QColor("#1e4620"))
+                        item.setForeground(QColor("#4caf50"))
                     else:
-                        item.setBackground(QColor("#f8d7da"))
-                        item.setForeground(QColor("#721c24"))
-                        
+                        item.setBackground(QColor("#5c1f1f"))
+                        item.setForeground(QColor("#f44336"))
+
                 if col == 7:  # Deploy Status
                     if item_text == 'Success':
-                        item.setBackground(QColor("#d4edda"))
-                        item.setForeground(QColor("#155724"))
+                        item.setBackground(QColor("#1e4620"))
+                        item.setForeground(QColor("#4caf50"))
                     else:
-                        item.setBackground(QColor("#f8d7da"))
-                        item.setForeground(QColor("#721c24"))
-                        
+                        item.setBackground(QColor("#5c1f1f"))
+                        item.setForeground(QColor("#f44336"))
+
                 self.deployments_table.setItem(row, col, item)
                 
     def update_statistics(self):
@@ -506,16 +554,16 @@ Deploy Success Rate: {stats.get('deploy_success_rate', 0):.1f}%
             
             for col, item_text in enumerate(items):
                 item = QTableWidgetItem(str(item_text))
-                
-                # Color code status columns
+
+                # Color code status columns with dark theme colors
                 if col == 6 or col == 7:  # Status columns
                     if item_text == 'Success':
-                        item.setBackground(QColor("#d4edda"))
-                        item.setForeground(QColor("#155724"))
+                        item.setBackground(QColor("#1e4620"))
+                        item.setForeground(QColor("#4caf50"))
                     else:
-                        item.setBackground(QColor("#f8d7da"))
-                        item.setForeground(QColor("#721c24"))
-                        
+                        item.setBackground(QColor("#5c1f1f"))
+                        item.setForeground(QColor("#f44336"))
+
                 self.deployments_table.setItem(row, col, item)
                 
     def export_excel(self):

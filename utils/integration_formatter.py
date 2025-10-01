@@ -121,11 +121,11 @@ class TeamsFormatter:
         # Build message
         message = []
 
-        # Header with ticket number (single emoji only)
+        # Header with prominent JIRA ID and Patch number
         if jira_ticket and jira_ticket != 'N/A':
-            message.append(f"🎫 {jira_ticket} - Deployment Complete")
+            message.append(f"🎫 PATCH: {jira_ticket} | {project_name} - Deployment Complete")
         else:
-            message.append(f"🎫 Deployment Complete - {project_name}")
+            message.append(f"🎫 {project_name} - Deployment Complete (No JIRA ID)")
 
         message.append("")  # Empty line
 

@@ -4,9 +4,9 @@ Handles all Excel operations for deployment history
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 import openpyxl
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -19,7 +19,7 @@ class ExcelManager:
     # Excel column headers
     HEADERS = [
         "JIRA PATCH ID",
-        "Timestamp", 
+        "Timestamp",
         "Project Name",
         "Component Name",
         "Environment",
@@ -34,6 +34,18 @@ class ExcelManager:
         "Deploy Status",
         "Notes",
         "Deployed By"
+    ]
+
+    # History sheet headers
+    HISTORY_HEADERS = [
+        "Timestamp",
+        "Action",
+        "Project",
+        "Component",
+        "JIRA ID",
+        "User",
+        "Details",
+        "Status"
     ]
     
     def __init__(self, base_path: str = "reports"):
@@ -54,11 +66,13 @@ class ExcelManager:
         return month_folder / f"{project_name}.xlsx"
         
     def _create_excel_file(self, filepath: Path) -> None:
-        """Create new Excel file with headers and formatting"""
+        """Create new Excel file with Deployments and History sheets"""
         wb = Workbook()
+
+        # Create Deployments sheet
         ws = wb.active
         ws.title = "Deployments"
-        
+
         # Add headers
         for col, header in enumerate(self.HEADERS, 1):
             cell = ws.cell(row=1, column=col, value=header)
@@ -66,12 +80,12 @@ class ExcelManager:
             cell.font = Font(bold=True, color="FFFFFF")
             cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
             cell.alignment = Alignment(horizontal="center", vertical="center")
-            
+
         # Set column widths
         column_widths = [15, 20, 20, 20, 12, 40, 20, 20, 20, 20, 20, 30, 12, 12, 30, 20]
         for col, width in enumerate(column_widths, 1):
             ws.column_dimensions[get_column_letter(col)].width = width
-            
+
         # Add borders to headers
         thin_border = Border(
             left=Side(style='thin'),
@@ -79,18 +93,234 @@ class ExcelManager:
             top=Side(style='thin'),
             bottom=Side(style='thin')
         )
-        
+
         for col in range(1, len(self.HEADERS) + 1):
             ws.cell(row=1, column=col).border = thin_border
-            
+
         # Freeze header row
         ws.freeze_panes = "A2"
-        
+
         # Add auto-filter
         ws.auto_filter.ref = f"A1:{get_column_letter(len(self.HEADERS))}1"
-        
+
+        # Create History sheet
+        history_ws = wb.create_sheet(title="History")
+
+        # Add history headers
+        for col, header in enumerate(self.HISTORY_HEADERS, 1):
+            cell = history_ws.cell(row=1, column=col, value=header)
+            # Header formatting
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill(start_color="E67E22", end_color="E67E22", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            cell.border = thin_border
+
+        # Set history column widths
+        history_widths = [20, 30, 20, 20, 15, 20, 40, 15]
+        for col, width in enumerate(history_widths, 1):
+            history_ws.column_dimensions[get_column_letter(col)].width = width
+
+        # Freeze history header row
+        history_ws.freeze_panes = "A2"
+
+        # Add auto-filter to history
+        history_ws.auto_filter.ref = f"A1:{get_column_letter(len(self.HISTORY_HEADERS))}1"
+
         wb.save(filepath)
-        
+
+    def check_duplicate_deployment(self, project_name: str, deployment_data: Dict[str, Any]) -> Tuple[bool, Optional[Dict[str, Any]]]:
+        """
+        Check if deployment is a duplicate based on JIRA ID or time proximity
+
+        Returns:
+            Tuple of (is_duplicate: bool, duplicate_details: Optional[Dict])
+        """
+        try:
+            # Get current month and year from deployment timestamp
+            if 'timestamp' in deployment_data and deployment_data['timestamp']:
+                deploy_time = datetime.strptime(deployment_data['timestamp'], "%Y-%m-%d %H:%M:%S")
+            else:
+                deploy_time = datetime.now()
+
+            month = deploy_time.month
+            year = deploy_time.year
+
+            # Get Excel file path
+            excel_path = self._get_excel_path(project_name, month, year)
+
+            # If file doesn't exist, no duplicates possible
+            if not excel_path.exists():
+                return False, None
+
+            # Open workbook and get deployments sheet
+            wb = openpyxl.load_workbook(excel_path, read_only=True)
+            ws = wb['Deployments']
+
+            # Get new deployment details
+            new_jira_id = deployment_data.get('jira_patch_id', 'N/A')
+            new_project = deployment_data.get('project_name', project_name)
+            new_component = deployment_data.get('component_name', '')
+
+            # Check last 10 rows for duplicates
+            max_row = ws.max_row
+            start_row = max(2, max_row - 9)  # Check last 10 rows, minimum row 2
+
+            for row_num in range(start_row, max_row + 1):
+                row = ws[row_num]
+
+                # Skip empty rows
+                if row[0].value is None:
+                    continue
+
+                existing_jira_id = row[0].value  # Column A: JIRA PATCH ID
+                existing_timestamp = row[1].value  # Column B: Timestamp
+                existing_project = row[2].value  # Column C: Project Name
+                existing_component = row[3].value  # Column D: Component Name
+
+                # Check 1: If JIRA ID is not N/A, check for exact JIRA ID match
+                if new_jira_id != 'N/A' and existing_jira_id == new_jira_id:
+                    if existing_project == new_project and existing_component == new_component:
+                        wb.close()
+                        return True, {
+                            'row': row_num,
+                            'jira_id': existing_jira_id,
+                            'timestamp': existing_timestamp,
+                            'project': existing_project,
+                            'component': existing_component,
+                            'reason': 'Same JIRA ID with same project and component'
+                        }
+
+                # Check 2: If JIRA ID is N/A, check for time proximity (within 5 minutes)
+                if new_jira_id == 'N/A':
+                    if existing_project == new_project and existing_component == new_component:
+                        # Parse existing timestamp
+                        if isinstance(existing_timestamp, str):
+                            try:
+                                existing_time = datetime.strptime(existing_timestamp, "%Y-%m-%d %H:%M:%S")
+                                time_diff = abs((deploy_time - existing_time).total_seconds())
+
+                                # If within 5 minutes (300 seconds)
+                                if time_diff <= 300:
+                                    wb.close()
+                                    return True, {
+                                        'row': row_num,
+                                        'jira_id': existing_jira_id,
+                                        'timestamp': existing_timestamp,
+                                        'project': existing_project,
+                                        'component': existing_component,
+                                        'reason': f'Same project and component within 5 minutes (time difference: {int(time_diff)} seconds)'
+                                    }
+                            except (ValueError, TypeError):
+                                pass
+
+            wb.close()
+            return False, None
+
+        except Exception as e:
+            print(f"Error checking duplicate: {str(e)}")
+            return False, None
+
+    def log_history(self, project_name: str, action: str, deployment_data: Dict[str, Any],
+                    details: str = "", status: str = "Success") -> bool:
+        """
+        Log an action to the History sheet
+
+        Args:
+            project_name: Name of the project
+            action: Action performed (e.g., "Deployment Saved", "Duplicate Detected")
+            deployment_data: Deployment data dictionary
+            details: Additional details about the action
+            status: Status of the action (Success/Warning/Error)
+        """
+        try:
+            # Get current month and year
+            if 'timestamp' in deployment_data and deployment_data['timestamp']:
+                deploy_time = datetime.strptime(deployment_data['timestamp'], "%Y-%m-%d %H:%M:%S")
+            else:
+                deploy_time = datetime.now()
+
+            month = deploy_time.month
+            year = deploy_time.year
+
+            # Get Excel file path
+            excel_path = self._get_excel_path(project_name, month, year)
+
+            # If file doesn't exist, create it
+            if not excel_path.exists():
+                self._create_excel_file(excel_path)
+
+            # Open workbook and get History sheet
+            wb = openpyxl.load_workbook(excel_path)
+
+            # Get or create History sheet
+            if 'History' in wb.sheetnames:
+                history_ws = wb['History']
+            else:
+                # Create History sheet if it doesn't exist (for older Excel files)
+                history_ws = wb.create_sheet(title="History")
+                # Add headers
+                thin_border = Border(
+                    left=Side(style='thin'),
+                    right=Side(style='thin'),
+                    top=Side(style='thin'),
+                    bottom=Side(style='thin')
+                )
+                for col, header in enumerate(self.HISTORY_HEADERS, 1):
+                    cell = history_ws.cell(row=1, column=col, value=header)
+                    cell.font = Font(bold=True, color="FFFFFF")
+                    cell.fill = PatternFill(start_color="E67E22", end_color="E67E22", fill_type="solid")
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    cell.border = thin_border
+
+            # Find next empty row
+            next_row = history_ws.max_row + 1
+
+            # Prepare history entry
+            history_data = [
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                action,
+                deployment_data.get('project_name', project_name),
+                deployment_data.get('component_name', ''),
+                deployment_data.get('jira_patch_id', 'N/A'),
+                deployment_data.get('deployed_by', ''),
+                details,
+                status
+            ]
+
+            # Write to history sheet
+            thin_border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            for col, value in enumerate(history_data, 1):
+                cell = history_ws.cell(row=next_row, column=col, value=value)
+                cell.border = thin_border
+
+                # Color code status column
+                if col == 8:  # Status column
+                    if status == 'Success':
+                        cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+                        cell.font = Font(color="006100")
+                    elif status == 'Warning':
+                        cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
+                        cell.font = Font(color="9C5700")
+                    else:  # Error
+                        cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+                        cell.font = Font(color="9C0006")
+
+            # Save workbook
+            wb.save(excel_path)
+            wb.close()
+
+            return True
+
+        except Exception as e:
+            print(f"Error logging history: {str(e)}")
+            return False
+
     def add_deployment(self, project_name: str, deployment_data: Dict[str, Any]) -> bool:
         """Add a deployment record to the monthly Excel file"""
         try:
@@ -172,11 +402,31 @@ class ExcelManager:
             # Save workbook
             wb.save(excel_path)
             wb.close()
-            
+
+            # Log to history
+            self.log_history(
+                project_name,
+                "Deployment Saved",
+                deployment_data,
+                f"Deployment record added successfully",
+                "Success"
+            )
+
             return True
-            
+
         except Exception as e:
             print(f"Error adding deployment: {str(e)}")
+            # Log error to history
+            try:
+                self.log_history(
+                    project_name,
+                    "Deployment Failed",
+                    deployment_data,
+                    f"Error: {str(e)}",
+                    "Error"
+                )
+            except:
+                pass
             return False
             
     def get_monthly_deployments(self, project_name: str, month: int, year: int) -> List[Dict[str, Any]]:

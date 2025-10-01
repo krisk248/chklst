@@ -123,6 +123,161 @@ class TimePickerDialog(QDialog):
         return self.selected_datetime
 
 
+class PostSaveDialog(QDialog):
+    """Dialog shown after successful deployment save with copy options"""
+
+    # Return codes
+    DONE = 1
+    NEW_DEPLOYMENT = 2
+
+    def __init__(self, deployment_data, parent=None):
+        super().__init__(parent)
+        self.deployment_data = deployment_data
+        self.setWindowTitle("Deployment Saved Successfully")
+        self.setModal(True)
+        self.setFixedSize(500, 400)
+
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout()
+
+        # Success header
+        header = QLabel("🎉 Deployment Saved Successfully!")
+        header.setAlignment(Qt.AlignCenter)
+        header.setFont(QFont("Arial", 14, QFont.Bold))
+        header.setStyleSheet("color: #27ae60; margin: 10px;")
+        layout.addWidget(header)
+
+        # Summary section
+        summary_group = QGroupBox("📋 Deployment Summary")
+        summary_group.setFont(QFont("Arial", 11, QFont.Bold))
+        summary_layout = QVBoxLayout()
+
+        summary_text = f"""
+<b>Project:</b> {self.deployment_data.get('project_name', '')}<br>
+<b>Component:</b> {self.deployment_data.get('component_name', '')}<br>
+<b>JIRA ID:</b> {self.deployment_data.get('jira_patch_id', 'N/A')}<br>
+<b>Environment:</b> {self.deployment_data.get('environment', '')}<br>
+<b>Timestamp:</b> {self.deployment_data.get('timestamp', '')}<br>
+<b>Build Status:</b> {"✅ Success" if self.deployment_data.get('build_status') else "❌ Failed"}<br>
+<b>Deploy Status:</b> {"✅ Success" if self.deployment_data.get('deploy_status') else "❌ Failed"}
+        """
+
+        summary_label = QLabel(summary_text)
+        summary_label.setWordWrap(True)
+        summary_label.setStyleSheet("padding: 10px;")
+        summary_layout.addWidget(summary_label)
+
+        summary_group.setLayout(summary_layout)
+        layout.addWidget(summary_group)
+
+        # Copy options section
+        copy_group = QGroupBox("📋 Copy to Clipboard")
+        copy_group.setFont(QFont("Arial", 11, QFont.Bold))
+        copy_layout = QVBoxLayout()
+
+        self.copy_jira_check = QCheckBox("Copy for JIRA")
+        self.copy_jira_check.setFont(QFont("Arial", 10))
+        copy_layout.addWidget(self.copy_jira_check)
+
+        self.copy_teams_check = QCheckBox("Copy for Microsoft Teams")
+        self.copy_teams_check.setFont(QFont("Arial", 10))
+        copy_layout.addWidget(self.copy_teams_check)
+
+        tip_label = QLabel("💡 Tip: Check both to copy to both platforms!")
+        tip_label.setStyleSheet("color: #7f8c8d; font-style: italic; font-size: 10px;")
+        copy_layout.addWidget(tip_label)
+
+        copy_group.setLayout(copy_layout)
+        layout.addWidget(copy_group)
+
+        # Buttons
+        btn_layout = QHBoxLayout()
+
+        done_btn = QPushButton("✅ Done")
+        done_btn.setFont(QFont("Arial", 11, QFont.Bold))
+        done_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #27ae60;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #2ecc71;
+            }
+        """)
+        done_btn.clicked.connect(self.on_done)
+        done_btn.setDefault(True)
+
+        new_btn = QPushButton("📝 New Deployment")
+        new_btn.setFont(QFont("Arial", 11, QFont.Bold))
+        new_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #5dade2;
+            }
+        """)
+        new_btn.clicked.connect(self.on_new_deployment)
+
+        btn_layout.addWidget(done_btn)
+        btn_layout.addWidget(new_btn)
+
+        layout.addLayout(btn_layout)
+
+        self.setLayout(layout)
+
+    def on_done(self):
+        """Handle Done button - copy if checkboxes selected"""
+        self.copy_to_clipboard()
+        self.done(PostSaveDialog.DONE)
+
+    def on_new_deployment(self):
+        """Handle New Deployment button - copy and prepare for new entry"""
+        self.copy_to_clipboard()
+        self.done(PostSaveDialog.NEW_DEPLOYMENT)
+
+    def copy_to_clipboard(self):
+        """Copy selected formats to clipboard"""
+        messages = []
+
+        if self.copy_jira_check.isChecked():
+            jira_msg = JiraFormatter.format(self.deployment_data)
+            messages.append("=== JIRA FORMAT ===\n" + jira_msg)
+
+        if self.copy_teams_check.isChecked():
+            teams_msg = TeamsFormatter.format(self.deployment_data)
+            messages.append("=== TEAMS FORMAT ===\n" + teams_msg)
+
+        if messages:
+            combined_message = "\n\n".join(messages)
+            clipboard = QApplication.clipboard()
+            clipboard.setText(combined_message)
+
+            # Show brief confirmation
+            formats = []
+            if self.copy_jira_check.isChecked():
+                formats.append("JIRA")
+            if self.copy_teams_check.isChecked():
+                formats.append("Teams")
+
+            if formats:
+                format_str = " and ".join(formats)
+                QMessageBox.information(
+                    self,
+                    "Copied!",
+                    f"Deployment info copied to clipboard for {format_str}!"
+                )
+
+
 class SimpleDeploymentForm(QWidget):
     """Simple deployment form with auto-fill from JSON"""
     
@@ -620,21 +775,21 @@ class SimpleDeploymentForm(QWidget):
             QMessageBox.critical(self, "Error", f"Error copying to Teams format: {str(e)}")
 
     def save_deployment(self):
-        """Save deployment to Excel"""
+        """Save deployment to Excel with duplicate detection"""
         try:
             # Validate required fields
             if self.project_combo.currentText() == "-- Select Project --":
                 QMessageBox.warning(self, "Validation", "Please select a project")
                 return
-                
+
             if not any([self.frontend_radio.isChecked(), self.backend_radio.isChecked(), self.backoffice_radio.isChecked()]):
                 QMessageBox.warning(self, "Validation", "Please select a component")
                 return
-                
+
             if not self.deployed_by.text().strip():
                 QMessageBox.warning(self, "Validation", "Please enter 'Deployed By' name")
                 return
-                
+
             # Get component name
             component_name = ""
             if self.frontend_radio.isChecked():
@@ -643,7 +798,7 @@ class SimpleDeploymentForm(QWidget):
                 component_name = self.current_component_data.get('component_name', 'Backend')
             elif self.backoffice_radio.isChecked():
                 component_name = self.current_component_data.get('component_name', 'Backoffice')
-                
+
             # Prepare deployment data
             deployment_data = {
                 'jira_patch_id': self.jira_patch.text().strip() or 'N/A',
@@ -663,19 +818,73 @@ class SimpleDeploymentForm(QWidget):
                 'notes': self.notes.toPlainText().strip(),
                 'deployed_by': self.deployed_by.text().strip()
             }
-            
+
+            # Check for duplicates
+            is_duplicate, duplicate_details = self.excel_manager.check_duplicate_deployment(
+                self.project_combo.currentText(),
+                deployment_data
+            )
+
+            if is_duplicate and duplicate_details:
+                # Show duplicate warning dialog
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setWindowTitle("Duplicate Deployment Detected")
+                msg.setText("A similar deployment already exists!")
+
+                duplicate_info = f"""
+Found existing deployment:
+• JIRA ID: {duplicate_details.get('jira_id', 'N/A')}
+• Project: {duplicate_details.get('project', '')}
+• Component: {duplicate_details.get('component', '')}
+• Timestamp: {duplicate_details.get('timestamp', '')}
+
+Reason: {duplicate_details.get('reason', '')}
+
+Do you want to save this deployment anyway?
+                """
+                msg.setInformativeText(duplicate_info)
+                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                msg.setDefaultButton(QMessageBox.No)
+
+                result = msg.exec_()
+
+                if result == QMessageBox.No:
+                    # Log cancelled duplicate to history
+                    self.excel_manager.log_history(
+                        self.project_combo.currentText(),
+                        "Duplicate Detected - Cancelled",
+                        deployment_data,
+                        duplicate_details.get('reason', 'Duplicate deployment cancelled by user'),
+                        "Warning"
+                    )
+                    return
+
+                # User chose to save anyway - log it
+                self.excel_manager.log_history(
+                    self.project_combo.currentText(),
+                    "Duplicate Detected - Saved Anyway",
+                    deployment_data,
+                    duplicate_details.get('reason', 'User chose to save duplicate deployment'),
+                    "Warning"
+                )
+
             # Save to Excel
             success = self.excel_manager.add_deployment(
                 self.project_combo.currentText(),
                 deployment_data
             )
-            
+
             if success:
-                QMessageBox.information(self, "Success", "Deployment saved successfully!")
+                # Show post-save dialog with copy options
+                dialog = PostSaveDialog(deployment_data, parent=self)
+                result = dialog.exec_()
+
+                # Always clear form after successful save
                 self.clear_form()
             else:
                 QMessageBox.warning(self, "Error", "Failed to save deployment")
-                
+
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error saving deployment: {str(e)}")
             

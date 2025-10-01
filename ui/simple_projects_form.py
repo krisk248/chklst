@@ -50,12 +50,16 @@ class SimpleProjectsTab(QWidget):
         # Buttons
         button_layout = QHBoxLayout()
         self.add_button = QPushButton("Add Project")
-        self.delete_button = QPushButton("Delete Project")
         self.add_button.clicked.connect(self.add_project)
-        self.delete_button.clicked.connect(self.delete_project)
-        
+
         button_layout.addWidget(self.add_button)
-        button_layout.addWidget(self.delete_button)
+        button_layout.addStretch()
+
+        # Note label for manual deletion
+        note_label = QLabel("💡 To delete a project, remove its JSON file from the 'projects' folder")
+        note_label.setStyleSheet("color: #7f8c8d; font-style: italic; font-size: 10px;")
+        layout.addWidget(note_label)
+
         layout.addLayout(button_layout)
         
         # Project list
@@ -94,8 +98,9 @@ class SimpleProjectsTab(QWidget):
         self.db_name_edit = QLineEdit()
         project_layout.addRow("DB Name:", self.db_name_edit)
 
-        self.backup_taken_check = QCheckBox()
-        project_layout.addRow("Backup Taken:", self.backup_taken_check)
+        self.environment_edit = QLineEdit()
+        self.environment_edit.setPlaceholderText("QA, UAT, PROD, etc.")
+        project_layout.addRow("Environment:", self.environment_edit)
 
         self.backup_location_edit = QLineEdit()
         self.backup_location_edit.setPlaceholderText("/backup/project_name/db")
@@ -160,7 +165,7 @@ class SimpleProjectsTab(QWidget):
         self.build_server_edit.setEnabled(enabled)
         self.deploy_server_edit.setEnabled(enabled)
         self.db_name_edit.setEnabled(enabled)
-        self.backup_taken_check.setEnabled(enabled)
+        self.environment_edit.setEnabled(enabled)
         self.backup_location_edit.setEnabled(enabled)
         
         # Component fields
@@ -210,7 +215,7 @@ class SimpleProjectsTab(QWidget):
         self.build_server_edit.setText(self.current_project_data.get('build_server', '192.168.1.149'))
         self.deploy_server_edit.setText(self.current_project_data.get('deploy_server', ''))
         self.db_name_edit.setText(self.current_project_data.get('db_name', ''))
-        self.backup_taken_check.setChecked(self.current_project_data.get('backup_taken', False))
+        self.environment_edit.setText(self.current_project_data.get('environment', 'QA'))
         self.backup_location_edit.setText(self.current_project_data.get('backup_location', ''))
         
         # Load component data
@@ -249,7 +254,7 @@ class SimpleProjectsTab(QWidget):
             "build_server": self.build_server_edit.text().strip(),
             "deploy_server": self.deploy_server_edit.text().strip(),
             "db_name": self.db_name_edit.text().strip(),
-            "backup_taken": self.backup_taken_check.isChecked(),
+            "environment": self.environment_edit.text().strip() or "QA",
             "backup_location": self.backup_location_edit.text().strip(),
             "components": {}
         }
@@ -292,28 +297,6 @@ class SimpleProjectsTab(QWidget):
                 self.projects_updated.emit()
             else:
                 QMessageBox.warning(self, "Error", f"Failed to create project '{name}'")
-                
-    def delete_project(self):
-        """Delete selected project"""
-        current_item = self.projects_list.currentItem()
-        if not current_item:
-            return
-            
-        project_name = current_item.text()
-        reply = QMessageBox.question(
-            self, 'Delete Project', 
-            f'Are you sure you want to delete project "{project_name}"?',
-            QMessageBox.Yes | QMessageBox.No, 
-            QMessageBox.No
-        )
-        
-        if reply == QMessageBox.Yes:
-            if self.json_manager.delete_project(project_name):
-                self.refresh_projects()
-                self.set_form_enabled(False)
-                self.projects_updated.emit()
-            else:
-                QMessageBox.warning(self, "Error", f"Failed to delete project '{project_name}'")
                 
     def save_all_changes(self):
         """Save all changes - handle project renaming if needed"""

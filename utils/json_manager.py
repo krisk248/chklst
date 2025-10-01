@@ -79,9 +79,8 @@ class ProjectJSONManager:
             "build_server": "192.168.1.149",
             "deploy_server": "",
             "db_name": "",
-            "backup_taken": False,
-            "backup_location": "",
             "environment": "QA",
+            "backup_location": "",
             "components": {
                 "frontend": {
                     "enabled": True,

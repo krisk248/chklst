@@ -13,6 +13,7 @@ from ui.dark_theme import get_dark_theme
 from ui.simple_deployment_new import SimpleDeploymentForm
 from ui.simple_projects_form import SimpleProjectsTab
 from ui.simple_reports import SimpleReportsViewer
+from ui.simple_last_saved import LastSavedTab
 from ui.simple_settings import SimpleSettingsTab
 from ui.simple_about import SimpleAboutTab
 
@@ -71,12 +72,14 @@ class SimpleMainWindow(QMainWindow):
         # Add tabs
         self.deployment_tab = SimpleDeploymentForm()
         self.projects_tab = SimpleProjectsTab()
+        self.last_saved_tab = LastSavedTab()
         self.reports_tab = SimpleReportsViewer()
         self.settings_tab = SimpleSettingsTab()
         self.about_tab = SimpleAboutTab()
-        
+
         self.tab_widget.addTab(self.deployment_tab, "📝 Deployment")
         self.tab_widget.addTab(self.projects_tab, "📁 Projects")
+        self.tab_widget.addTab(self.last_saved_tab, "💾 Last Saved")
         self.tab_widget.addTab(self.reports_tab, "📊 Reports")
         self.tab_widget.addTab(self.settings_tab, "⚙️ Settings")
         self.tab_widget.addTab(self.about_tab, "ℹ️ About")

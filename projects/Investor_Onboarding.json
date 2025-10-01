@@ -3,21 +3,23 @@
   "project_url": "",
   "build_server": "192.168.1.149",
   "deploy_server": "",
-  "db_name": "Investor Onboarding_DB",
+  "db_name": "",
   "backup_taken": false,
+  "backup_location": "",
+  "environment": "QA",
   "components": {
     "frontend": {
-      "enabled": false,
+      "enabled": true,
       "component_name": "Investor Onboarding Frontend",
-      "developer_name": "Frontend Dev",
+      "developer_name": "",
       "vcs_type": "Git",
       "vcs_url": "",
       "build_command": ""
     },
     "backend": {
-      "enabled": false,
+      "enabled": true,
       "component_name": "Investor Onboarding Backend",
-      "developer_name": "Backend Dev",
+      "developer_name": "",
       "vcs_type": "Git",
       "vcs_url": "",
       "build_command": ""
@@ -25,12 +27,10 @@
     "backoffice": {
       "enabled": false,
       "component_name": "",
-      "developer_name": "Backoffice Dev",
+      "developer_name": "",
       "vcs_type": "",
       "vcs_url": "",
       "build_command": ""
     }
-  },
-  "environment": "QA",
-  "backup_location": "/backup/investor_onboarding/db"
+  }
 }
