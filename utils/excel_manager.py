@@ -138,7 +138,7 @@ class ExcelManager:
         try:
             # Get current month and year from deployment timestamp
             if 'timestamp' in deployment_data and deployment_data['timestamp']:
-                deploy_time = datetime.strptime(deployment_data['timestamp'], "%Y-%m-%d %H:%M:%S")
+                deploy_time = datetime.strptime(deployment_data['timestamp'], "%d-%b-%Y %I:%M%p")
             else:
                 deploy_time = datetime.now()
 
@@ -196,7 +196,7 @@ class ExcelManager:
                         # Parse existing timestamp
                         if isinstance(existing_timestamp, str):
                             try:
-                                existing_time = datetime.strptime(existing_timestamp, "%Y-%m-%d %H:%M:%S")
+                                existing_time = datetime.strptime(existing_timestamp, "%d-%b-%Y %I:%M%p")
                                 time_diff = abs((deploy_time - existing_time).total_seconds())
 
                                 # If within 5 minutes (300 seconds)
@@ -235,7 +235,7 @@ class ExcelManager:
         try:
             # Get current month and year
             if 'timestamp' in deployment_data and deployment_data['timestamp']:
-                deploy_time = datetime.strptime(deployment_data['timestamp'], "%Y-%m-%d %H:%M:%S")
+                deploy_time = datetime.strptime(deployment_data['timestamp'], "%d-%b-%Y %I:%M%p")
             else:
                 deploy_time = datetime.now()
 
@@ -277,7 +277,7 @@ class ExcelManager:
 
             # Prepare history entry
             history_data = [
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                datetime.now().strftime("%d-%b-%Y %I:%M%p"),
                 action,
                 deployment_data.get('project_name', project_name),
                 deployment_data.get('component_name', ''),
@@ -326,7 +326,7 @@ class ExcelManager:
         try:
             # Get current month and year from deployment timestamp
             if 'timestamp' in deployment_data and deployment_data['timestamp']:
-                deploy_time = datetime.strptime(deployment_data['timestamp'], "%Y-%m-%d %H:%M:%S")
+                deploy_time = datetime.strptime(deployment_data['timestamp'], "%d-%b-%Y %I:%M%p")
             else:
                 deploy_time = datetime.now()
                 
@@ -350,7 +350,7 @@ class ExcelManager:
             # Prepare row data
             row_data = [
                 deployment_data.get('jira_patch_id', 'N/A'),
-                deployment_data.get('timestamp', datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                deployment_data.get('timestamp', datetime.now().strftime("%d-%b-%Y %I:%M%p")),
                 deployment_data.get('project_name', project_name),
                 deployment_data.get('component_name', ''),
                 deployment_data.get('environment', 'QA'),

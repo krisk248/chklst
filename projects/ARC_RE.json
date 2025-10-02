@@ -1,0 +1,36 @@
+{
+  "project_name": "ARC RE",
+  "build_server": "192.168.1.149",
+  "deploy_server": "192.168.1.60->192.168.14.5",
+  "db_name": "Q_ARC_TTSRE",
+  "environment": "QA",
+  "backup_location": "/home/admin/tts/ARC/backup",
+  "components": {
+    "frontend": {
+      "enabled": true,
+      "component_name": "TTS-RE",
+      "developer_name": "Umar",
+      "vcs_type": "SVN",
+      "vcs_url": "",
+      "build_command": "gulp nomu",
+      "component_url": "https://qa1.ttsme.com:18002/TTS-RE/index.html#/"
+    },
+    "backend": {
+      "enabled": true,
+      "component_name": "TTSRE",
+      "developer_name": "Umar",
+      "vcs_type": "Git",
+      "vcs_url": "https://github.com/TTS-FZLLC/tts-ksa-arc-re-serverside",
+      "build_command": "maven"
+    },
+    "backoffice": {
+      "enabled": false,
+      "component_name": "",
+      "developer_name": "Backoffice Dev",
+      "vcs_type": "",
+      "vcs_url": "",
+      "build_command": "",
+      "component_url": ""
+    }
+  }
+}

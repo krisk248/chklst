@@ -403,7 +403,7 @@ class PDFGenerator:
             textColor=colors.grey
         )
         
-        footer_text = f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Deployment Tracking System"
+        footer_text = f"Generated on {datetime.now().strftime('%d-%b-%Y %I:%M%p')} | Deployment Tracking System"
         footer = Paragraph(footer_text, footer_style)
         story.append(footer)
         

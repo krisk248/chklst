@@ -1,23 +1,24 @@
 {
   "project_name": "TTSRE",
-  "project_url": "",
   "build_server": "192.168.1.149",
   "deploy_server": "",
-  "db_name": "TTSRE_DB",
-  "backup_taken": false,
+  "db_name": "",
+  "environment": "QA",
+  "backup_location": "",
   "components": {
     "frontend": {
-      "enabled": false,
+      "enabled": true,
       "component_name": "TTSRE Frontend",
-      "developer_name": "Frontend Dev",
+      "developer_name": "",
       "vcs_type": "Git",
       "vcs_url": "",
-      "build_command": ""
+      "build_command": "",
+      "component_url": ""
     },
     "backend": {
-      "enabled": false,
+      "enabled": true,
       "component_name": "TTSRE Backend",
-      "developer_name": "Backend Dev",
+      "developer_name": "",
       "vcs_type": "Git",
       "vcs_url": "",
       "build_command": ""
@@ -25,12 +26,11 @@
     "backoffice": {
       "enabled": false,
       "component_name": "",
-      "developer_name": "Backoffice Dev",
+      "developer_name": "",
       "vcs_type": "",
       "vcs_url": "",
-      "build_command": ""
+      "build_command": "",
+      "component_url": ""
     }
-  },
-  "environment": "QA",
-  "backup_location": "/backup/ttsre/db"
+  }
 }
