@@ -74,7 +74,7 @@ class JiraFormatter:
             table.append(f"| Database | {db_info} |")
 
         if backup_location:
-            table.append(f"| Backup Location | {backup_location} |")
+            table.append(f"| Previous Build Backup | {backup_location} |")
 
         if notes:
             table.append(f"| Notes | {notes} |")
@@ -164,7 +164,7 @@ class TeamsFormatter:
 
         # Backup location
         if backup_location:
-            message.append(f"• Backup Location: {backup_location}")
+            message.append(f"• Previous Build Backup: {backup_location}")
 
         # Developer information
         if developer_name:

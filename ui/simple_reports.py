@@ -597,9 +597,9 @@ Deploy Success Rate: {stats.get('deploy_success_rate', 0):.1f}%
         
         # Headers
         headers = [
-            "JIRA PATCH ID", "Timestamp", "Project Name", "Component Name", 
+            "JIRA PATCH ID", "Timestamp", "Project Name", "Component Name",
             "Environment", "SVN/GIT URL", "Developer Name", "Build Server",
-            "Deploy Server", "Database Name", "Database Script", "Backup Location",
+            "Deploy Server", "Database Name", "Database Script", "Previous Build Backup",
             "Build Status", "Deploy Status", "Notes", "Deployed By"
         ]
         

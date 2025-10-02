@@ -727,6 +727,11 @@ class SimpleDeploymentForm(QWidget):
         component_url = self.current_component_data.get('component_url', '') if self.current_component_data else ''
 
         # Prepare deployment data
+        # Generate date-specific backup folder (YYYYMMDD format)
+        deployment_date = self.timestamp_edit.dateTime().toString("yyyyMMdd")
+        base_backup = self.auto_backup_path.text()
+        full_backup_path = f"{base_backup}\\{deployment_date}" if base_backup else ""
+
         deployment_data = {
             'jira_patch_id': self.jira_patch.text().strip() or 'N/A',
             'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
@@ -740,7 +745,7 @@ class SimpleDeploymentForm(QWidget):
             'deploy_server': self.auto_deploy_server.text(),
             'database_name': self.auto_database.text(),
             'database_script': self.db_script.text().strip() or 'N/A',
-            'backup_location': self.auto_backup_path.text(),
+            'backup_location': full_backup_path,
             'build_status': self.build_success.isChecked(),
             'deploy_status': self.deploy_success.isChecked(),
             'notes': self.notes.toPlainText().strip(),
@@ -832,6 +837,11 @@ class SimpleDeploymentForm(QWidget):
             component_url = self.current_component_data.get('component_url', '') if self.current_component_data else ''
 
             # Prepare deployment data
+            # Generate date-specific backup folder (YYYYMMDD format)
+            deployment_date = self.timestamp_edit.dateTime().toString("yyyyMMdd")
+            base_backup = self.auto_backup_path.text()
+            full_backup_path = f"{base_backup}\\{deployment_date}" if base_backup else ""
+
             deployment_data = {
                 'jira_patch_id': self.jira_patch.text().strip() or 'N/A',
                 'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
@@ -845,7 +855,7 @@ class SimpleDeploymentForm(QWidget):
                 'deploy_server': self.auto_deploy_server.text(),
                 'database_name': self.auto_database.text(),
                 'database_script': self.db_script.text().strip() or 'N/A',
-                'backup_location': self.auto_backup_path.text(),
+                'backup_location': full_backup_path,
                 'build_status': self.build_success.isChecked(),
                 'deploy_status': self.deploy_success.isChecked(),
                 'notes': self.notes.toPlainText().strip(),

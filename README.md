@@ -204,7 +204,7 @@ reports/
 - Deploy Server
 - Database Name
 - Database Script
-- Backup Location
+- Previous Build Backup (Auto-generated with date: base_path\YYYYMMDD)
 - Build Status (Success/Failed)
 - Deploy Status (Success/Failed)
 - Notes

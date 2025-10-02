@@ -300,7 +300,7 @@ class LastSavedTab(QWidget):
 
 💾 Database:          {self.selected_deployment.get('database_name', '')}
 📝 DB Script:         {self.selected_deployment.get('database_script', 'N/A')}
-💾 Backup Location:   {self.selected_deployment.get('backup_location', '')}
+💾 Previous Build Backup: {self.selected_deployment.get('backup_location', '')}
 
 🔨 Build Status:      {"✅ Success" if self.selected_deployment.get('build_status') else "❌ Failed"}
 🚀 Deploy Status:     {"✅ Success" if self.selected_deployment.get('deploy_status') else "❌ Failed"}

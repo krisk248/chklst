@@ -29,7 +29,7 @@ class ExcelManager:
         "Deploy Server",
         "Database Name",
         "Database Script",
-        "Backup Location",
+        "Previous Build Backup",
         "Build Status",
         "Deploy Status",
         "Notes",
