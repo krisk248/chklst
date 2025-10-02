@@ -4,6 +4,7 @@
 
 # Unwanted folders
 unwanted/
+projects/
 
 # Generated reports and data
 reports/
