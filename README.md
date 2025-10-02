@@ -58,16 +58,16 @@ A **simple, Excel-based deployment tracking tool** designed to help teams manage
 ## 🖥️ Screenshots
 
 ### Main Deployment Screen
-*[Screenshot 1 will be added here]*
+![Main Deployment Screen](screenshot/1.png)
 
 ### Project Management
-*[Screenshot 2 will be added here]*
+![Project Management](screenshot/2.png)
 
 ### Deployment Reports
-*[Screenshot 3 will be added here]*
+![Deployment Reports](screenshot/3.png)
 
 ### Settings & Configuration
-*[Screenshot 4 will be added here]*
+![Settings & Configuration](screenshot/4.png)
 
 ---
 
