@@ -299,6 +299,7 @@ class LastSavedTab(QWidget):
 🚀 Deploy Server:     {self.selected_deployment.get('deploy_server', '')}
 
 💾 Database:          {self.selected_deployment.get('database_name', '')}
+💾 DB Backup Location: {self.selected_deployment.get('db_backup_location', '')}
 📝 DB Script:         {self.selected_deployment.get('database_script', 'N/A')}
 💾 Previous Build Backup: {self.selected_deployment.get('backup_location', '')}
 

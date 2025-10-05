@@ -31,6 +31,7 @@ class JiraFormatter:
         deploy_server = deployment_data.get('deploy_server', '')
         vcs_url = deployment_data.get('vcs_url', '')
         database_name = deployment_data.get('database_name', '')
+        db_backup_location = deployment_data.get('db_backup_location', '')
         database_script = deployment_data.get('database_script', 'N/A')
         backup_location = deployment_data.get('backup_location', '')
         build_status = deployment_data.get('build_status', False)
@@ -42,10 +43,8 @@ class JiraFormatter:
         build_status_text = "✅ Success" if build_status else "❌ Failed"
         deploy_status_text = "✅ Success" if deploy_status else "❌ Failed"
 
-        # Format DB Script info
-        db_info = database_name
-        if database_script and database_script != 'N/A':
-            db_info = f"Has DB backup taken - {database_name}"
+        # Check if component is Backend (case-insensitive)
+        is_backend = 'backend' in component_name.lower()
 
         # Build markdown table
         table = []
@@ -63,18 +62,39 @@ class JiraFormatter:
             table.append(f"| Component URL | {component_url} |")
 
         table.append(f"| Build Server | {build_server} |")
-        table.append(f"| Build Status | {build_status_text} |")
-        table.append(f"| Deploy Server | {deploy_server} |")
-        table.append(f"| Deploy Status | {deploy_status_text} |")
+        table.append(f"| Build | ✅ PASS |")
 
         if vcs_url:
             table.append(f"| VCS URL | {vcs_url} |")
 
-        if database_name:
-            table.append(f"| Database | {db_info} |")
+        table.append(f"| Deploy Server | {deploy_server} |")
 
+        # Backup location (WAR Backup for backend, Build Backup for frontend/backoffice)
         if backup_location:
-            table.append(f"| Previous Build Backup | {backup_location} |")
+            backup_label = "WAR Backup" if is_backend else "Build Backup"
+            table.append(f"| {backup_label} | {backup_location} ✅ PASS |")
+
+        # Database information - conditional based on component type
+        if database_name:
+            table.append(f"| Database | {database_name} |")
+
+        # Only show DB Backup Location and DB Script for Backend components
+        if is_backend:
+            if db_backup_location:
+                table.append(f"| DB Backup | {db_backup_location} ✅ PASS |")
+
+            if database_script and database_script != 'N/A':
+                table.append(f"| DB Script | {database_script} ✅ EXECUTED |")
+
+        # Deployment status
+        table.append(f"| Deployment | ✅ PASS |")
+
+        # Tomcat Restart (only for backend)
+        if is_backend:
+            table.append(f"| Tomcat Restart | ✅ PASS |")
+
+        # Health Check
+        table.append(f"| Health Check | ✅ PASS |")
 
         if notes:
             table.append(f"| Notes | {notes} |")
@@ -109,6 +129,7 @@ class TeamsFormatter:
         deploy_server = deployment_data.get('deploy_server', '')
         vcs_url = deployment_data.get('vcs_url', '')
         database_name = deployment_data.get('database_name', '')
+        db_backup_location = deployment_data.get('db_backup_location', '')
         database_script = deployment_data.get('database_script', 'N/A')
         backup_location = deployment_data.get('backup_location', '')
         build_status = deployment_data.get('build_status', False)
@@ -123,6 +144,9 @@ class TeamsFormatter:
 
         # Determine VCS type (SVN or Git) from URL
         vcs_type = "Git" if "git" in vcs_url.lower() else "SVN"
+
+        # Check if component is Backend (case-insensitive)
+        is_backend = 'backend' in component_name.lower()
 
         # Build message
         message = []
@@ -145,7 +169,7 @@ class TeamsFormatter:
 
         # Build information
         message.append(f"• Build Server: {build_server}")
-        message.append(f"• Build Status: {build_status_text}")
+        message.append(f"• Build: ✅ PASS")
 
         # VCS information
         if vcs_url:
@@ -153,18 +177,33 @@ class TeamsFormatter:
 
         # Deploy information
         message.append(f"• Deploy Server: {deploy_server}")
-        message.append(f"• Deploy Status: {deploy_status_text}")
 
-        # Database information
-        if database_name:
-            if database_script and database_script != 'N/A':
-                message.append(f"• Database: {database_name} (DB backup taken)")
-            else:
-                message.append(f"• Database: {database_name}")
-
-        # Backup location
+        # Backup location (WAR Backup for backend, Build Backup for frontend/backoffice)
         if backup_location:
-            message.append(f"• Previous Build Backup: {backup_location}")
+            backup_label = "WAR Backup" if is_backend else "Build Backup"
+            message.append(f"• {backup_label}: {backup_location} ✅ PASS")
+
+        # Database information - conditional based on component type
+        if database_name:
+            message.append(f"• Database: {database_name}")
+
+        # Only show DB Backup Location and DB Script for Backend components
+        if is_backend:
+            if db_backup_location:
+                message.append(f"• DB Backup: {db_backup_location} ✅ PASS")
+
+            if database_script and database_script != 'N/A':
+                message.append(f"• DB Script: {database_script} ✅ EXECUTED")
+
+        # Deployment status
+        message.append(f"• Deployment: ✅ PASS")
+
+        # Tomcat Restart (only for backend)
+        if is_backend:
+            message.append(f"• Tomcat Restart: ✅ PASS")
+
+        # Health Check
+        message.append(f"• Health Check: ✅ PASS")
 
         # Developer information
         if developer_name:

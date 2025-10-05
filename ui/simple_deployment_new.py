@@ -514,12 +514,31 @@ class SimpleDeploymentForm(QWidget):
         timestamp_layout.addWidget(time_btn)
         
         form_layout.addRow("Timestamp:", timestamp_layout)
-        
-        # Database Script
+
+        # Database Script - Radio Button + Conditional Text Field
+        db_script_layout = QHBoxLayout()
+
+        # Radio buttons for "Use DB Script?"
+        self.use_db_script_yes = QRadioButton("Yes")
+        self.use_db_script_no = QRadioButton("No")
+        self.use_db_script_no.setChecked(True)  # Default to No
+
+        db_script_layout.addWidget(QLabel("Use DB Script?"))
+        db_script_layout.addWidget(self.use_db_script_yes)
+        db_script_layout.addWidget(self.use_db_script_no)
+
+        # Text field for DB script name
         self.db_script = QLineEdit()
-        self.db_script.setPlaceholderText("Enter DB script name (optional)")
-        form_layout.addRow("Database Script:", self.db_script)
-        
+        self.db_script.setPlaceholderText("Enter DB script name")
+        self.db_script.setEnabled(False)  # Disabled by default
+        db_script_layout.addWidget(self.db_script)
+
+        form_layout.addRow("Database Script:", db_script_layout)
+
+        # Connect radio buttons to enable/disable text field
+        self.use_db_script_yes.toggled.connect(self.on_db_script_radio_changed)
+        self.use_db_script_no.toggled.connect(self.on_db_script_radio_changed)
+
         # Status checkboxes
         status_layout = QHBoxLayout()
         
@@ -673,6 +692,15 @@ class SimpleDeploymentForm(QWidget):
         if dialog.exec_() == QDialog.Accepted:
             self.timestamp_edit.setDateTime(dialog.get_datetime())
 
+    def on_db_script_radio_changed(self):
+        """Enable/disable DB script text field based on radio button selection"""
+        if self.use_db_script_yes.isChecked():
+            self.db_script.setEnabled(True)
+            self.db_script.setFocus()
+        else:
+            self.db_script.setEnabled(False)
+            self.db_script.clear()
+
     def validate_patch_id(self) -> bool:
         """
         Validate Patch ID and show warning if missing
@@ -732,6 +760,17 @@ class SimpleDeploymentForm(QWidget):
         base_backup = self.auto_backup_path.text()
         full_backup_path = f"{base_backup}\\{deployment_date}" if base_backup else ""
 
+        # Generate DB backup location with database name + date + .bak
+        db_name = self.auto_database.text()
+        db_backup_base = self.current_project_data.get('db_backup_location', '') if self.current_project_data else ''
+        db_backup_location = f"{db_backup_base}{db_name}_{deployment_date}.bak" if db_backup_base and db_name else ""
+
+        # Get DB script value based on radio button
+        if self.use_db_script_yes.isChecked():
+            db_script_value = self.db_script.text().strip() or 'N/A'
+        else:
+            db_script_value = 'N/A'
+
         deployment_data = {
             'jira_patch_id': self.jira_patch.text().strip() or 'N/A',
             'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
@@ -743,8 +782,9 @@ class SimpleDeploymentForm(QWidget):
             'developer_name': self.auto_developer.text(),
             'build_server': self.auto_build_server.text(),
             'deploy_server': self.auto_deploy_server.text(),
-            'database_name': self.auto_database.text(),
-            'database_script': self.db_script.text().strip() or 'N/A',
+            'database_name': db_name,
+            'db_backup_location': db_backup_location,
+            'database_script': db_script_value,
             'backup_location': full_backup_path,
             'build_status': self.build_success.isChecked(),
             'deploy_status': self.deploy_success.isChecked(),
@@ -842,6 +882,17 @@ class SimpleDeploymentForm(QWidget):
             base_backup = self.auto_backup_path.text()
             full_backup_path = f"{base_backup}\\{deployment_date}" if base_backup else ""
 
+            # Generate DB backup location with database name + date + .bak
+            db_name = self.auto_database.text()
+            db_backup_base = self.current_project_data.get('db_backup_location', '') if self.current_project_data else ''
+            db_backup_location = f"{db_backup_base}{db_name}_{deployment_date}.bak" if db_backup_base and db_name else ""
+
+            # Get DB script value based on radio button
+            if self.use_db_script_yes.isChecked():
+                db_script_value = self.db_script.text().strip() or 'N/A'
+            else:
+                db_script_value = 'N/A'
+
             deployment_data = {
                 'jira_patch_id': self.jira_patch.text().strip() or 'N/A',
                 'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
@@ -853,8 +904,9 @@ class SimpleDeploymentForm(QWidget):
                 'developer_name': self.auto_developer.text(),
                 'build_server': self.auto_build_server.text(),
                 'deploy_server': self.auto_deploy_server.text(),
-                'database_name': self.auto_database.text(),
-                'database_script': self.db_script.text().strip() or 'N/A',
+                'database_name': db_name,
+                'db_backup_location': db_backup_location,
+                'database_script': db_script_value,
                 'backup_location': full_backup_path,
                 'build_status': self.build_success.isChecked(),
                 'deploy_status': self.deploy_success.isChecked(),
@@ -935,7 +987,9 @@ Do you want to save this deployment anyway?
         """Clear the form for next entry"""
         self.jira_patch.clear()
         self.timestamp_edit.setDateTime(QDateTime.currentDateTime())
+        self.use_db_script_no.setChecked(True)  # Reset to "No"
         self.db_script.clear()
+        self.db_script.setEnabled(False)  # Disable the text field
         self.build_success.setChecked(True)
         self.deploy_success.setChecked(True)
         self.notes.clear()

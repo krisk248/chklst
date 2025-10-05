@@ -28,6 +28,7 @@ class ExcelManager:
         "Build Server",
         "Deploy Server",
         "Database Name",
+        "DB Backup Location",
         "Database Script",
         "Previous Build Backup",
         "Build Status",
@@ -359,6 +360,7 @@ class ExcelManager:
                 deployment_data.get('build_server', ''),
                 deployment_data.get('deploy_server', ''),
                 deployment_data.get('database_name', ''),
+                deployment_data.get('db_backup_location', ''),
                 deployment_data.get('database_script', 'N/A'),
                 deployment_data.get('backup_location', ''),
                 'Success' if deployment_data.get('build_status', False) else 'Failed',
@@ -457,12 +459,13 @@ class ExcelManager:
                     'build_server': row[7],
                     'deploy_server': row[8],
                     'database_name': row[9],
-                    'database_script': row[10],
-                    'backup_location': row[11],
-                    'build_status': row[12] == 'Success',
-                    'deploy_status': row[13] == 'Success',
-                    'notes': row[14],
-                    'deployed_by': row[15]
+                    'db_backup_location': row[10],
+                    'database_script': row[11],
+                    'backup_location': row[12],
+                    'build_status': row[13] == 'Success',
+                    'deploy_status': row[14] == 'Success',
+                    'notes': row[15],
+                    'deployed_by': row[16]
                 }
                 deployments.append(deployment)
                 

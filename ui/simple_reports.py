@@ -599,7 +599,7 @@ Deploy Success Rate: {stats.get('deploy_success_rate', 0):.1f}%
         headers = [
             "JIRA PATCH ID", "Timestamp", "Project Name", "Component Name",
             "Environment", "SVN/GIT URL", "Developer Name", "Build Server",
-            "Deploy Server", "Database Name", "Database Script", "Previous Build Backup",
+            "Deploy Server", "Database Name", "DB Backup Location", "Database Script", "Previous Build Backup",
             "Build Status", "Deploy Status", "Notes", "Deployed By"
         ]
         
@@ -623,12 +623,13 @@ Deploy Success Rate: {stats.get('deploy_success_rate', 0):.1f}%
                 ws.cell(row=row, column=8, value=deployment.get('build_server', ''))
                 ws.cell(row=row, column=9, value=deployment.get('deploy_server', ''))
                 ws.cell(row=row, column=10, value=deployment.get('database_name', ''))
-                ws.cell(row=row, column=11, value=deployment.get('database_script', 'N/A'))
-                ws.cell(row=row, column=12, value=deployment.get('backup_location', ''))
-                ws.cell(row=row, column=13, value='Success' if deployment.get('build_status') else 'Failed')
-                ws.cell(row=row, column=14, value='Success' if deployment.get('deploy_status') else 'Failed')
-                ws.cell(row=row, column=15, value=deployment.get('notes', ''))
-                ws.cell(row=row, column=16, value=deployment.get('deployed_by', ''))
+                ws.cell(row=row, column=11, value=deployment.get('db_backup_location', ''))
+                ws.cell(row=row, column=12, value=deployment.get('database_script', 'N/A'))
+                ws.cell(row=row, column=13, value=deployment.get('backup_location', ''))
+                ws.cell(row=row, column=14, value='Success' if deployment.get('build_status') else 'Failed')
+                ws.cell(row=row, column=15, value='Success' if deployment.get('deploy_status') else 'Failed')
+                ws.cell(row=row, column=16, value=deployment.get('notes', ''))
+                ws.cell(row=row, column=17, value=deployment.get('deployed_by', ''))
                 row += 1
                 
         # Auto-adjust column widths

@@ -95,6 +95,10 @@ class SimpleProjectsTab(QWidget):
         self.db_name_edit = QLineEdit()
         project_layout.addRow("DB Name:", self.db_name_edit)
 
+        self.db_backup_location_edit = QLineEdit()
+        self.db_backup_location_edit.setPlaceholderText("C:\\TTS\\DBBackups\\UAE\\")
+        project_layout.addRow("DB Backup Location:", self.db_backup_location_edit)
+
         self.environment_edit = QLineEdit()
         self.environment_edit.setPlaceholderText("QA, UAT, PROD, etc.")
         project_layout.addRow("Environment:", self.environment_edit)
@@ -223,6 +227,7 @@ class SimpleProjectsTab(QWidget):
         self.build_server_edit.setText(self.current_project_data.get('build_server', '192.168.1.149'))
         self.deploy_server_edit.setText(self.current_project_data.get('deploy_server', ''))
         self.db_name_edit.setText(self.current_project_data.get('db_name', ''))
+        self.db_backup_location_edit.setText(self.current_project_data.get('db_backup_location', ''))
         self.environment_edit.setText(self.current_project_data.get('environment', 'QA'))
         self.backup_location_edit.setText(self.current_project_data.get('backup_location', ''))
 
@@ -265,6 +270,7 @@ class SimpleProjectsTab(QWidget):
             "build_server": self.build_server_edit.text().strip(),
             "deploy_server": self.deploy_server_edit.text().strip(),
             "db_name": self.db_name_edit.text().strip(),
+            "db_backup_location": self.db_backup_location_edit.text().strip(),
             "environment": self.environment_edit.text().strip() or "QA",
             "backup_location": self.backup_location_edit.text().strip(),
             "components": {}
