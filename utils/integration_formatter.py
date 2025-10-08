@@ -43,8 +43,8 @@ class JiraFormatter:
         build_status_text = "✅ Success" if build_status else "❌ Failed"
         deploy_status_text = "✅ Success" if deploy_status else "❌ Failed"
 
-        # Check if component is Backend (case-insensitive)
-        is_backend = 'backend' in component_name.lower()
+        # Check if component is Backend based on radio button selection
+        is_backend = deployment_data.get('component_type') == 'backend'
 
         # Build markdown table
         table = []
@@ -145,8 +145,8 @@ class TeamsFormatter:
         # Determine VCS type (SVN or Git) from URL
         vcs_type = "Git" if "git" in vcs_url.lower() else "SVN"
 
-        # Check if component is Backend (case-insensitive)
-        is_backend = 'backend' in component_name.lower()
+        # Check if component is Backend based on radio button selection
+        is_backend = deployment_data.get('component_type') == 'backend'
 
         # Build message
         message = []

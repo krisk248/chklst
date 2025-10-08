@@ -742,14 +742,18 @@ class SimpleDeploymentForm(QWidget):
             QMessageBox.warning(self, "Validation", "Please enter 'Deployed By' name")
             return None
 
-        # Get component name
+        # Get component name and type
         component_name = ""
+        component_type = None
         if self.frontend_radio.isChecked():
             component_name = self.current_component_data.get('component_name', 'Frontend')
+            component_type = 'frontend'
         elif self.backend_radio.isChecked():
             component_name = self.current_component_data.get('component_name', 'Backend')
+            component_type = 'backend'
         elif self.backoffice_radio.isChecked():
             component_name = self.current_component_data.get('component_name', 'Backoffice')
+            component_type = 'backoffice'
 
         # Get component URL if available
         component_url = self.current_component_data.get('component_url', '') if self.current_component_data else ''
@@ -776,6 +780,7 @@ class SimpleDeploymentForm(QWidget):
             'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
             'project_name': self.project_combo.currentText(),
             'component_name': component_name,
+            'component_type': component_type,
             'component_url': component_url,
             'environment': self.auto_environment.text(),
             'vcs_url': self.auto_vcs_url.text(),
@@ -864,14 +869,18 @@ class SimpleDeploymentForm(QWidget):
             if not self.validate_patch_id():
                 return
 
-            # Get component name
+            # Get component name and type
             component_name = ""
+            component_type = None
             if self.frontend_radio.isChecked():
                 component_name = self.current_component_data.get('component_name', 'Frontend')
+                component_type = 'frontend'
             elif self.backend_radio.isChecked():
                 component_name = self.current_component_data.get('component_name', 'Backend')
+                component_type = 'backend'
             elif self.backoffice_radio.isChecked():
                 component_name = self.current_component_data.get('component_name', 'Backoffice')
+                component_type = 'backoffice'
 
             # Get component URL if available
             component_url = self.current_component_data.get('component_url', '') if self.current_component_data else ''
@@ -898,6 +907,7 @@ class SimpleDeploymentForm(QWidget):
                 'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
                 'project_name': self.project_combo.currentText(),
                 'component_name': component_name,
+                'component_type': component_type,
                 'component_url': component_url,
                 'environment': self.auto_environment.text(),
                 'vcs_url': self.auto_vcs_url.text(),
