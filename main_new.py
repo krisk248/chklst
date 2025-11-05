@@ -12,6 +12,7 @@ from PyQt5.QtGui import QIcon, QFont, QPixmap, QPainter
 from ui.dark_theme import get_dark_theme
 from ui.simple_deployment_new import SimpleDeploymentForm
 from ui.simple_projects_form import SimpleProjectsTab
+from ui.simple_library import SimpleLibraryTab
 from ui.simple_reports import SimpleReportsViewer
 from ui.simple_last_saved import LastSavedTab
 from ui.simple_settings import SimpleSettingsTab
@@ -72,6 +73,7 @@ class SimpleMainWindow(QMainWindow):
         # Add tabs
         self.deployment_tab = SimpleDeploymentForm()
         self.projects_tab = SimpleProjectsTab()
+        self.library_tab = SimpleLibraryTab()
         self.last_saved_tab = LastSavedTab()
         self.reports_tab = SimpleReportsViewer()
         self.settings_tab = SimpleSettingsTab()
@@ -79,17 +81,26 @@ class SimpleMainWindow(QMainWindow):
 
         self.tab_widget.addTab(self.deployment_tab, "📝 Deployment")
         self.tab_widget.addTab(self.projects_tab, "📁 Projects")
+        self.tab_widget.addTab(self.library_tab, "📚 Library")
         self.tab_widget.addTab(self.last_saved_tab, "💾 Last Saved")
         self.tab_widget.addTab(self.reports_tab, "📊 Reports")
         self.tab_widget.addTab(self.settings_tab, "⚙️ Settings")
         self.tab_widget.addTab(self.about_tab, "ℹ️ About")
-        
+
         # Connect signals for refresh
         self.projects_tab.projects_updated.connect(self.refresh_deployment_projects)
+        self.library_tab.library_updated.connect(self.refresh_library_data)
         
     def refresh_deployment_projects(self):
         """Refresh project list in deployment tab"""
         self.deployment_tab.load_projects()
+
+    def refresh_library_data(self):
+        """Refresh library data in all tabs"""
+        # Refresh deployment tab dropdowns
+        self.deployment_tab.load_deployed_by()
+        # Refresh projects tab dropdowns
+        self.projects_tab.load_library_data()
         
 
 def main():
