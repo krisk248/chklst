@@ -439,9 +439,28 @@ class SimpleDeploymentForm(QWidget):
         jira_id = self.jira_patch.text().strip() if self.jira_patch.text().strip() else 'N/A'
         db_script = self.db_script.text().strip() if self.use_db_script_yes.isChecked() else 'N/A'
 
+        # Get timestamp and format date as YYYYMMDD for backup folders
+        timestamp_str = self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP")
+        date_folder = self.timestamp_edit.dateTime().toString("yyyyMMdd")  # Format: 20251109
+
+        # Build backup location with date folder
+        base_backup_location = self.current_project_data.get('backup_location', '')
+        backup_location_with_date = f"{base_backup_location}\\{date_folder}" if base_backup_location else ''
+
+        # Database backup location with date and filename (only if db script is available)
+        base_db_backup = self.current_project_data.get('db_backup_location', '')
+        database_name = self.current_project_data.get('db_name', '')
+
+        if self.use_db_script_yes.isChecked() and base_db_backup and database_name:
+            # Format: C:\Path\Q_ADIB_MIG_20251109.bak
+            db_backup_with_date = f"{base_db_backup}\\{database_name}_{date_folder}.bak"
+        else:
+            # If no database script, keep the base path only
+            db_backup_with_date = base_db_backup
+
         deployment_data = {
             'jira_patch_id': jira_id,
-            'timestamp': self.timestamp_edit.dateTime().toString("dd-MMM-yyyy h:mmAP"),
+            'timestamp': timestamp_str,
             'project_name': self.project_combo.currentText(),
             'component_name': self.current_component_data.get('component_name', ''),
             'component_url': self.current_component_data.get('component_url', ''),
@@ -450,10 +469,10 @@ class SimpleDeploymentForm(QWidget):
             'developer_name': self.current_component_data.get('developer_name', ''),
             'build_server': self.current_project_data.get('build_server', ''),
             'deploy_server': self.current_project_data.get('deploy_server', ''),
-            'database_name': self.current_project_data.get('db_name', ''),
-            'db_backup_location': self.current_project_data.get('db_backup_location', ''),
+            'database_name': database_name,
+            'db_backup_location': db_backup_with_date,
             'database_script': db_script,
-            'backup_location': self.current_project_data.get('backup_location', ''),
+            'backup_location': backup_location_with_date,
             'build_status': self.build_success.isChecked(),
             'deploy_status': self.deploy_success.isChecked(),
             'notes': self.notes.toPlainText(),

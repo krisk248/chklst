@@ -78,13 +78,10 @@ class JiraFormatter:
         if database_name:
             table.append(f"| Database | {database_name} |")
 
-        # Only show DB Backup Location and DB Script for Backend components
-        if is_backend:
+        # Show Database Backup when database script is available
+        if database_script and database_script != 'N/A':
             if db_backup_location:
-                table.append(f"| DB Backup | {db_backup_location} ✅ PASS |")
-
-            if database_script and database_script != 'N/A':
-                table.append(f"| DB Script | {database_script} ✅ EXECUTED |")
+                table.append(f"| Database Backup | {db_backup_location} ✅ PASS |")
 
         # Deployment status
         table.append(f"| Deployment | ✅ PASS |")
@@ -187,13 +184,10 @@ class TeamsFormatter:
         if database_name:
             message.append(f"• Database: {database_name}")
 
-        # Only show DB Backup Location and DB Script for Backend components
-        if is_backend:
+        # Show Database Backup when database script is available
+        if database_script and database_script != 'N/A':
             if db_backup_location:
-                message.append(f"• DB Backup: {db_backup_location} ✅ PASS")
-
-            if database_script and database_script != 'N/A':
-                message.append(f"• DB Script: {database_script} ✅ EXECUTED")
+                message.append(f"• Database Backup: {db_backup_location} ✅ PASS")
 
         # Deployment status
         message.append(f"• Deployment: ✅ PASS")
