@@ -3,12 +3,18 @@
     "Kannan",
     "Irfan",
     "Syed",
-    "Abarna Gunasekar"
+    "Abarna Gunasekar",
+    "Shankar nath",
+    "Umar",
+    "Kaarthiga Ayyappan"
   ],
   "build_servers": [
-    "192.168.1.149"
+    "192.168.1.149",
+    "192.168.1.136"
   ],
-  "deploy_servers": [],
+  "deploy_servers": [
+    "192.168.1.142"
+  ],
   "environments": [
     "QA"
   ]
