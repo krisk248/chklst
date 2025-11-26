@@ -5,13 +5,23 @@ name = "pypi"
 
 [packages]
 pyqt5 = "*"
-sqlalchemy = "*"
+sqlalchemy = ">=2.0"
 pandas = "*"
 openpyxl = "*"
 reportlab = "*"
 matplotlib = "*"
+pydantic = ">=2.0"
+python-multipart = "*"
+pydantic-settings = "*"
+aiosqlite = "*"
+fastapi = "*"
+uvicorn = "*"
+pytest-cov = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-asyncio = "*"
+httpx = "*"
 
 [requires]
 python_version = "3.12"

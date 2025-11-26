@@ -1,0 +1,92 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.venv
+venv
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules
+frontend/node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# IDE
+.idea
+.vscode
+.vscode-insiders
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+.nyc_output
+coverage
+
+# Build artifacts
+*.egg-info
+dist
+build
+frontend/dist
+frontend/build
+*.egg
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.docker
+.dockerignore
+
+# Documentation
+*.md
+docs/
+README.md
+
+# Data (handled by volumes)
+data/
+reports/pdfs/
+*.db
+*.sqlite
+*.sqlite3
+
+# MoAI/Claude
+.moai/
+.claude/
+.mcp.json
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+
+# Temporary files
+*.tmp
+*.log
+Jiraa/
+
+# Package lock files (optional, use ci in docker)
+package-lock.json
+yarn.lock
+
+# Other project-specific
+Pipfile.lock
+IMPLEMENTATION_*.md
+FRONTEND_*.md
+DELIVERABLES.md
+.coverage

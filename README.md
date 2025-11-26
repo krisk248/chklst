@@ -1,283 +1,254 @@
-# 📋 chklst - Deployment Tracking & Checklist Tool
+# chklst - Deployment Tracking Web Application
 
-A **simple, Excel-based deployment tracking tool** designed to help teams manage and track their software deployments efficiently. Built with a clean dark-themed UI for comfortable daily use.
+A modern web application for tracking software deployments across multiple projects and environments. Originally developed as a PyQt5 desktop application, chklst has been transformed into a powerful and intuitive web interface built with Vue 3 and FastAPI.
 
 **Developed by:** Kannan
 **Organization:** TTS
 
 ---
 
-## 📖 What is chklst?
+## Overview
 
-**chklst** is a desktop application that helps development and DevOps teams:
+**chklst** is now a full-stack web application that helps development and DevOps teams:
 - **Track deployments** across multiple projects and environments
-- **Maintain deployment history** in organized monthly Excel reports
+- **Maintain deployment history** in organized databases
 - **Generate deployment summaries** for JIRA tickets and team notifications
 - **Monitor deployment statistics** with built-in reports and analytics
 - **Prevent duplicate deployments** with intelligent duplicate detection
-- **Standardize deployment workflows** across teams
+- **Access from anywhere** via web browser on any device
+- **Real-time updates** via WebSocket support
 
 ---
 
-## 🎯 Key Features
+## Key Features
 
-### ✅ **Excel-Based Tracking**
-- Automatic monthly Excel file generation per project
-- Structured deployment logs with timestamps, JIRA IDs, and status
-- History tracking for all deployment actions
-- No database setup required - everything stored in Excel
+### Deployment Tracking
+- Record deployments with JIRA IDs, timestamps, and detailed status
+- Track across multiple projects and environments
+- Support for multi-component deployments
+- Prevent duplicate deployments with intelligent detection
 
-### ✅ **Smart Duplicate Detection**
-- Prevents duplicate deployments by JIRA ID matching
-- Time-based proximity detection (5-minute window)
-- Confirmation dialogs with duplicate details
+### Project & Component Management
+- Organize deployments by projects
+- Manage multiple components per project
+- Maintain developer assignments and server configurations
+- Component-specific build and deploy servers
 
-### ✅ **Multi-Component Deployments**
-- Track Frontend, Backend, and Backoffice components separately
-- Support for multiple components in a single deployment
-- Component-specific build and deployment servers
+### JIRA & Teams Integration
+- Quick copy-to-clipboard functionality
+- Format deployment summaries for JIRA tickets
+- Direct integration with Microsoft Teams messaging
+- Automatic notification support
 
-### ✅ **Project Management**
-- Add, edit, and delete projects with ease
-- Configure project-specific settings (VCS URLs, servers, databases)
-- Copy existing projects as templates
+### Reports & Analytics
+- Monthly deployment statistics and trends
+- Success/failure rate analysis by project and environment
+- PDF report generation with charts
+- Excel export with detailed deployment data
+- Real-time statistics dashboard
 
-### ✅ **Reports & Analytics**
-- Monthly deployment statistics
-- Success/failure rates for builds and deployments
-- Component-wise deployment counts
-- PDF report generation
+### Library Management
+- Reusable presets for developers, build servers, deploy servers
+- Quick selection from saved libraries
+- Easy customization and management
 
-### ✅ **Dark Theme UI**
-- Easy on the eyes for long working hours
-- Clean, professional interface
-- Keyboard-friendly navigation
-
----
-
-## 🖥️ Screenshots
-
-### Main Deployment Screen
-![Main Deployment Screen](screenshot/1.png)
-
-### Project Management
-![Project Management](screenshot/2.png)
-
-### Deployment Reports
-![Deployment Reports](screenshot/3.png)
-
-### Settings & Configuration
-![Settings & Configuration](screenshot/4.png)
+### Real-time Updates
+- WebSocket support for live deployment notifications
+- Real-time updates across multiple browser tabs
+- Automatic refresh of dashboards and reports
 
 ---
 
-## 📦 Installation
+## Technology Stack
+
+### Frontend
+- **Vue 3** - Progressive JavaScript framework with TypeScript
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix Vue** - Accessible component library
+- **Pinia** - State management for Vue
+- **Axios** - HTTP client for API calls
+- **Vite** - Modern build tool
+
+### Backend
+- **FastAPI** - Modern Python web framework
+- **Python 3.12** - Programming language
+- **SQLAlchemy 2.0** - Object-relational mapper
+- **PostgreSQL/SQLite** - Database
+- **Pydantic** - Data validation
+- **ReportLab** - PDF generation
+- **Openpyxl** - Excel file handling
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- Python 3.8 or higher
-- pipenv (for dependency management)
+- Python 3.12+
+- Node.js 18+
+- Pipenv (for Python)
+- npm or yarn (for Node)
 
-### Setup Steps
+### Installation & Running
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd chklst
-   ```
-
-2. **Install dependencies**
+1. **Install dependencies**
    ```bash
    pipenv install
+   cd frontend && npm install && cd ..
    ```
 
-3. **Activate virtual environment**
+2. **Run in Development Mode** (with hot reload)
    ```bash
-   pipenv shell
+   pipenv run python app.py --dev
    ```
+   - Backend: http://localhost:8000
+   - Frontend: http://localhost:3000 (opens automatically)
 
-4. **Run the application**
+3. **Run in Production Mode**
    ```bash
-   python main_new.py
+   cd frontend && npm run build && cd ..
+   pipenv run python app.py
    ```
+   - Application: http://localhost:8000
+
+### Command Options
+```bash
+pipenv run python app.py              # Production on port 8000
+pipenv run python app.py --port 9000  # Custom port
+pipenv run python app.py --dev        # Development mode with hot reload
+pipenv run python app.py --no-browser # Don't auto-open browser
+```
 
 ---
 
-## 🚀 Quick Start Guide
+## Testing
 
-### 1. **Add a Project**
-   - Go to the **Projects** tab
-   - Click "Add New Project"
-   - Fill in project details (name, components, servers, VCS URLs)
-   - Save the project
+```bash
+# Run all tests with coverage
+pipenv run python run_tests.py
 
-### 2. **Record a Deployment**
-   - Go to the **Deployment** tab
-   - Select your project from the dropdown
-   - Choose components (Frontend/Backend/Backoffice)
-   - Enter JIRA Patch ID (e.g., PROJ-123)
-   - Fill in deployment details (timestamp, servers, database info)
-   - Mark build and deployment status
-   - Click "Save Deployment"
+# Run without coverage
+pipenv run python run_tests.py --no-cov
 
-### 3. **View Reports**
-   - Go to the **Reports** tab
-   - Select month and year
-   - View deployment statistics and charts
-   - Generate PDF reports if needed
+# Run specific test
+pipenv run python run_tests.py -k test_health
 
-### 4. **Check Deployment History**
-   - Go to the **Last Saved** tab
-   - View recent deployments across all projects
-   - Filter by project or date
+# Verbose output
+pipenv run python run_tests.py -v
+```
 
 ---
 
-## 📂 File Structure
+## Project Structure
 
 ```
 chklst/
-├── main_new.py                    # Main application entry point
-├── ui/                            # UI components
-│   ├── simple_deployment_new.py   # Deployment form
-│   ├── simple_projects_form.py    # Project management
-│   ├── simple_reports.py          # Reports viewer
-│   ├── simple_last_saved.py       # Recent deployments
-│   ├── simple_settings.py         # Settings
-│   └── dark_theme.py              # Dark theme styling
-├── utils/                         # Utility modules
-│   ├── excel_manager.py           # Excel operations
-│   └── pdf_generator.py           # PDF report generation
-├── projects/                      # Project JSON files (gitignored)
-├── reports/                       # Monthly Excel reports (gitignored)
-├── settings.json                  # User settings
-└── README.md                      # This file
+├── backend/                      # FastAPI application
+│   ├── api/routes/              # API endpoints
+│   ├── models/                  # Database models
+│   ├── services/                # Business logic
+│   ├── websocket/               # WebSocket handlers
+│   ├── main.py                  # FastAPI app
+│   ├── database.py              # Database config
+│   └── config.py                # Settings
+├── frontend/                    # Vue 3 application
+│   ├── src/
+│   │   ├── components/         # Vue components
+│   │   ├── views/             # Page components
+│   │   ├── stores/            # Pinia state management
+│   │   ├── router/            # Vue Router config
+│   │   └── App.vue            # Root component
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── tsconfig.json
+├── tests/                       # Test suite
+│   ├── test_api/               # API tests
+│   ├── conftest.py             # Pytest fixtures
+│   └── test_*.py
+├── app.py                       # Entry point
+├── run_tests.py                 # Test runner
+├── Pipfile                      # Python dependencies
+└── README.md                    # This file
 ```
 
 ---
 
-## 🛠️ How It Works
+## Database
 
-### Deployment Workflow
+### Development
+SQLite is used by default (no setup required - auto-created)
 
-1. **User selects a project** → Project configuration loads automatically
-2. **User selects components** → Frontend/Backend/Backoffice checkboxes
-3. **User enters deployment details** → JIRA ID, servers, timestamps, etc.
-4. **System checks for duplicates** → Prevents accidental re-submissions
-5. **User confirms and saves** → Data written to monthly Excel file
-6. **History logged** → All actions tracked in History sheet
-
-### Data Storage
-
-- **Project Configurations**: Stored as JSON files in `projects/` folder
-- **Deployment Records**: Stored in Excel files organized by month (`reports/MMM_YYYY/ProjectName.xlsx`)
-- **Each Excel file contains**:
-  - **Deployments Sheet**: Main deployment records
-  - **History Sheet**: Audit log of all actions
-
-### Monthly Organization
-
-Reports are automatically organized into monthly folders:
-```
-reports/
-├── Oct_2025/
-│   ├── ProjectA.xlsx
-│   ├── ProjectB.xlsx
-│   └── ProjectC.xlsx
-└── Nov_2025/
-    ├── ProjectA.xlsx
-    └── ProjectB.xlsx
+### Production
+Set environment variable for PostgreSQL:
+```bash
+export DATABASE_URL="postgresql://user:password@localhost/chklst"
 ```
 
 ---
 
-## 📊 Excel Report Format
+## API Documentation
 
-### Deployments Sheet Columns:
-- JIRA PATCH ID
-- Timestamp (DD-MMM-YYYY HH:MMAM/PM)
-- Project Name
-- Component Name
-- Environment (QA/Staging/Production)
-- SVN/GIT URL
-- Developer Name
-- Build Server
-- Deploy Server
-- Database Name
-- Database Script
-- Previous Build Backup (Auto-generated with date: base_path\YYYYMMDD)
-- Build Status (Success/Failed)
-- Deploy Status (Success/Failed)
-- Notes
-- Deployed By
-
-### History Sheet Columns:
-- Timestamp
-- Action (Deployment Saved, Duplicate Detected, etc.)
-- Project
-- Component
-- JIRA ID
-- User
-- Details
-- Status (Success/Warning/Error)
+When running locally, visit:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-### Settings (via Settings Tab)
-- **User Name**: Default name for "Deployed By" field
-- **Default Environment**: QA, Staging, or Production
-- **Auto-copy Format**: Automatically copy deployment summary after save
-
-### Project Settings (per project)
-- Component-specific VCS URLs
-- Build servers
-- Deploy servers
-- Database configurations
-- Backup locations
+Create `.env` file in project root:
+```env
+DATABASE_URL=sqlite:///chklst.db
+DEBUG=true
+HOST=127.0.0.1
+PORT=8000
+```
 
 ---
 
-## 🎨 Design Philosophy
+## Troubleshooting
 
-- **Simplicity First**: Clean, uncluttered interface
-- **Excel-Based**: No complex databases - familiar Excel format
-- **Dark Theme**: Comfortable for extended use
-- **Duplicate Prevention**: Smart checks to avoid mistakes
-- **Audit Trail**: Complete history of all actions
-- **Monthly Reports**: Organized, easy-to-find deployment records
+### Port Already in Use
+```bash
+pipenv run python app.py --port 9000
+```
 
----
+### Database Reset (Development)
+```bash
+rm chklst.db  # Remove SQLite database
+# Database will be recreated on next run
+```
 
-## 🤝 Contributing
-
-This is an internal TTS tool. For questions or issues, please contact the development team.
-
----
-
-## 📝 License
-
-Internal use only - TTS Organization
-
----
-
-## 👤 Developer
-
-**Kannan**
-TTS Organization
+### Frontend Build Issues
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+cd ..
+```
 
 ---
 
-## 🔄 Version History
+## Contributing
 
-- **v1.0** - Initial release with Excel-based tracking
-- Deployment form with duplicate detection
-- Project management
-- Monthly Excel reports
-- Dark theme UI
+1. Create feature branch
+2. Make changes
+3. Run tests: `pipenv run python run_tests.py`
+4. Submit pull request
 
 ---
 
-## 📧 Support
+## License & Attribution
 
-For support or feature requests, please contact the TTS development team.
+© 2025 chklst. All Rights Reserved.
+
+**Developed by:** Kannan
+**Organization:** TTS
+
+This application was built with a focus on user experience, performance, and maintainability. The transition from desktop to web ensures accessibility across all platforms while maintaining the powerful functionality that teams depend on for deployment tracking and management.
+
+---
+
+## Support
+
+For issues, questions, or feature requests, please contact the development team.

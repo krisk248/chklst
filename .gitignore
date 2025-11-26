@@ -1,54 +1,162 @@
-# Claude Code configuration
-.claude/
-.serena/
+# ========================================
+# COMPANY DATA - MUST NEVER BE COMMITTED
+# ========================================
 
-# Unwanted folders
-unwanted/
-projects/
-
-# Generated reports and data
-reports/
-data/
+# Database files (contains deployment records)
 *.db
 *.sqlite
 *.sqlite3
+data/
+data/**
 
-# Python cache and compiled files
+# Company project configurations
+projects/
+projects/**
+
+# Company reports and exports
+reports/
+reports/**
+exports/
+*.csv
+*.xlsx
+*.xls
+
+# JIRA data
+Jiraa/
+Jiraa/**
+
+# User settings (may contain personal info)
+settings.json
+library.json
+
+# Screenshots with potentially sensitive info
+screenshot/
+
+# ========================================
+# CLAUDE/AI CONFIGURATION (User-specific)
+# ========================================
+CLAUDE.md
+.claude/
+.serena/
+.moai/
+.moai-backups/
+.mcp.json
+
+# ========================================
+# PYTHON
+# ========================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.pyo
+*.pyc
+*.egg
+*.egg-info/
+.eggs/
 
-# Virtual environment
+# Virtual environments
 venv/
 env/
 ENV/
-.venv
+.venv/
+.venv_*/
+.pipenv/
 
-# IDE and editor files
+# Testing
+.pytest_cache/
+.coverage
+coverage.json
+htmlcov/
+.tox/
+.nox/
+
+# Type checking
+.mypy_cache/
+.ruff_cache/
+
+# ========================================
+# NODE / FRONTEND
+# ========================================
+node_modules/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+.tscache/
+
+# Next.js / Nuxt
+.next/
+.nuxt/
+docs/.next/
+docs/out/
+
+# ========================================
+# IDE AND EDITORS
+# ========================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-*
+
+# ========================================
+# OS FILES
+# ========================================
 .DS_Store
+Thumbs.db
+Desktop.ini
 
-# Pipenv
-.pipenv/
-
-# CSV exports (if you have test data)
-exports/
-*.csv
-
-# Logs
+# ========================================
+# LOGS AND TEMPORARY FILES
+# ========================================
 *.log
 logs/
-
-# OS files
-Thumbs.db
-.DS_Store
-
-# Temporary files
 *.tmp
+*.temp
 *.bak
+*.backup
 .temp/
+*_backup_*/
+*-backup/
+hooks_backup_*/
+docs_backup_*/
+
+# ========================================
+# DEPLOYMENT AND CLOUD
+# ========================================
+.env
+.env.*
+!.env.example
+.vercel/
+.netlify/
+.firebase/
+.aws/
+
+# ========================================
+# DOCKER (Keep compose files, ignore runtime)
+# ========================================
+# Keep: docker-compose.yml, Dockerfile
+# Ignore runtime data
+
+# ========================================
+# MISC
+# ========================================
+unwanted/
+.playwright-mcp
+.uv_cache/
+.uv-cache/
+
+# Old/legacy files that shouldn't be tracked
+main_new.py
+QA Details.csv
+
+# Large manifest files (generated)
+*_MANIFEST.txt
+IMPLEMENTATION_COMPLETE.txt
