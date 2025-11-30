@@ -8,10 +8,13 @@ export interface WebSocketMessage {
 }
 
 export interface LibraryPresets {
+  id?: number
   developers: string[]
   build_servers: string[]
   deploy_servers: string[]
   environments: string[]
+  created_at?: string
+  updated_at?: string
 }
 
 export const useLibraryStore = defineStore('library', () => {

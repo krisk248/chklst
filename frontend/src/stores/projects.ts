@@ -10,22 +10,29 @@ export interface WebSocketMessage {
 export interface Component {
   id?: number
   name: string
-  developer: string
-  vcs_type: 'git' | 'svn'
-  vcs_url: string
-  build_command: string
-  component_url: string
+  developer?: string
+  vcs_type?: 'git' | 'svn'
+  vcs_url?: string
+  build_command?: string
+  component_url?: string
+  enabled?: boolean
+  description?: string
+  created_at?: string
+  updated_at?: string
 }
 
 export interface Project {
   id?: number
   name: string
-  build_server: string
-  deploy_server: string
-  database_name: string
-  environment: string
-  backup_location: string
+  build_server?: string
+  deploy_server?: string
+  database_name?: string
+  environment?: string
+  backup_location?: string
+  description?: string
   components: Component[]
+  created_at?: string
+  updated_at?: string
 }
 
 export const useProjectsStore = defineStore('projects', () => {

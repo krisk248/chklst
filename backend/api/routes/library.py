@@ -111,7 +111,7 @@ async def add_developer(
         )
 
 
-@router.delete("/developers/{name}", response_model=LibraryResponse)
+@router.delete("/developers/{name}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_developer(
     name: str,
     session: AsyncSession = Depends(get_db_session),
@@ -127,7 +127,6 @@ async def remove_developer(
             )
 
         await session.commit()
-        return library
     except HTTPException:
         await session.rollback()
         raise
@@ -167,7 +166,7 @@ async def add_build_server(
         )
 
 
-@router.delete("/build-servers/{name}", response_model=LibraryResponse)
+@router.delete("/build-servers/{name}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_build_server(
     name: str,
     session: AsyncSession = Depends(get_db_session),
@@ -183,7 +182,6 @@ async def remove_build_server(
             )
 
         await session.commit()
-        return library
     except HTTPException:
         await session.rollback()
         raise
@@ -223,7 +221,7 @@ async def add_deploy_server(
         )
 
 
-@router.delete("/deploy-servers/{name}", response_model=LibraryResponse)
+@router.delete("/deploy-servers/{name}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_deploy_server(
     name: str,
     session: AsyncSession = Depends(get_db_session),
@@ -239,7 +237,6 @@ async def remove_deploy_server(
             )
 
         await session.commit()
-        return library
     except HTTPException:
         await session.rollback()
         raise
@@ -279,7 +276,7 @@ async def add_environment(
         )
 
 
-@router.delete("/environments/{name}", response_model=LibraryResponse)
+@router.delete("/environments/{name}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_environment(
     name: str,
     session: AsyncSession = Depends(get_db_session),
@@ -295,7 +292,6 @@ async def remove_environment(
             )
 
         await session.commit()
-        return library
     except HTTPException:
         await session.rollback()
         raise

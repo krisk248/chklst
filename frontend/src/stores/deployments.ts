@@ -9,7 +9,7 @@ export interface WebSocketMessage {
 
 export interface Deployment {
   id?: number
-  jira_id: string  // API field name
+  jira_id?: string  // Optional - can be empty
   timestamp: string
   project_id: number
   component_id?: number  // Nullable for legacy data
