@@ -23,7 +23,7 @@ export const useLibraryStore = defineStore('library', () => {
   })
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  const { get, post, delete: deleteApi } = useApi()
+  const { get, put, delete: deleteApi } = useApi()
 
   const fetchPresets = async () => {
     isLoading.value = true
@@ -96,7 +96,7 @@ export const useLibraryStore = defineStore('library', () => {
     isLoading.value = true
     error.value = null
     try {
-      await post('/library', presets.value)
+      await put('/library', presets.value)
     } catch (err) {
       error.value = 'Failed to save presets'
       console.error(err)
