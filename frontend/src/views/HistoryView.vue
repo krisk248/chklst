@@ -395,7 +395,7 @@ import Button from '../components/ui/Button.vue'
 import { useDeploymentsStore, type Deployment } from '../stores/deployments'
 import { useProjectsStore } from '../stores/projects'
 import { useSettingsStore } from '../stores/settings'
-import { useClipboard } from '../composables/useClipboard'
+import { useClipboard, type DeploymentData } from '../composables/useClipboard'
 import { useToast } from '../composables/useToast'
 import { RefreshCw, Copy, X, Save, Trash2, AlertTriangle } from 'lucide-vue-next'
 
@@ -621,37 +621,55 @@ const performDelete = async () => {
   }
 }
 
-const handleCopyToJira = async (deployment: Deployment) => {
-  const data = {
-    'JIRA ID': deployment.jira_id || 'NULL',
-    'Timestamp': deployment.timestamp,
-    'Project': getProjectName(deployment.project_id),
-    'Component': getComponentName(deployment.component_id),
-    'Deploy Status': deployment.deploy_status,
-    'Deployed By': deployment.deployed_by,
+// Build deployment data for copy operations
+const buildDeploymentDataFromHistory = (deployment: Deployment): DeploymentData => {
+  const project = projectsStore.projects.find(p => p.id === deployment.project_id)
+  let component = null
+  if (deployment.component_id) {
+    for (const proj of projectsStore.projects) {
+      component = proj.components?.find(c => c.id === deployment.component_id)
+      if (component) break
+    }
   }
+
+  return {
+    patchId: deployment.jira_id || undefined,
+    project: project?.name || `Project ${deployment.project_id}`,
+    component: component?.name || getComponentName(deployment.component_id),
+    environment: deployment.environment || project?.environment,
+    componentUrl: component?.component_url,
+    buildServer: deployment.build_server || project?.build_server,
+    buildStatus: deployment.build_status,
+    vcsUrl: deployment.vcs_url || component?.vcs_url,
+    deployServer: deployment.deploy_server || project?.deploy_server,
+    buildBackup: project?.backup_location,
+    databaseName: deployment.database_name || project?.database_name,
+    deployStatus: deployment.deploy_status,
+    databaseScript: deployment.database_script || undefined,
+    developer: deployment.developer_name || component?.developer,
+    deployedBy: deployment.deployed_by,
+    timestamp: deployment.timestamp,
+    notes: deployment.notes || undefined,
+  }
+}
+
+const handleCopyToJira = async (deployment: Deployment) => {
+  const data = buildDeploymentDataFromHistory(deployment)
 
   const text = formatForJira(data)
   if (await copyToClipboard(text)) {
-    success('Copied to clipboard!')
+    success('Copied to clipboard for JIRA!')
   } else {
     error('Failed to copy')
   }
 }
 
 const handleCopyToTeams = async (deployment: Deployment) => {
-  const data = {
-    'JIRA ID': deployment.jira_id || 'NULL',
-    'Timestamp': deployment.timestamp,
-    'Project': getProjectName(deployment.project_id),
-    'Component': getComponentName(deployment.component_id),
-    'Deploy Status': deployment.deploy_status,
-    'Deployed By': deployment.deployed_by,
-  }
+  const data = buildDeploymentDataFromHistory(deployment)
 
   const text = formatForTeams(data)
   if (await copyToClipboard(text)) {
-    success('Copied to clipboard!')
+    success('Copied to clipboard for Teams!')
   } else {
     error('Failed to copy')
   }

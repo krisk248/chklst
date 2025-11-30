@@ -1,5 +1,6 @@
 <template>
   <button
+    :type="type"
     :class="[
       'px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2',
       variantClasses,
@@ -19,12 +20,14 @@ interface Props {
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   size: 'md',
   disabled: false,
+  type: 'button',  // IMPORTANT: Default to 'button' to prevent form submission
 })
 
 const variantClasses = computed(() => {

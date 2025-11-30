@@ -19,7 +19,7 @@ class ComponentBase(BaseModel):
 
 class ComponentCreate(ComponentBase):
     """Create component schema"""
-    project_id: int
+    project_id: Optional[int] = None  # Set from URL parameter
 
 
 class ComponentUpdate(BaseModel):
@@ -38,8 +38,8 @@ class ComponentResponse(ComponentBase):
     """Component response schema"""
     id: int
     project_id: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

@@ -78,7 +78,7 @@
                 required
                 class="flex-1"
               />
-              <Button @click="setCurrentTimestamp" variant="secondary" size="sm">
+              <Button type="button" @click="setCurrentTimestamp" variant="secondary" size="sm">
                 <Clock class="w-3 h-3" />
                 Now
               </Button>
@@ -157,34 +157,61 @@
           </div>
         </div>
 
+        <!-- Saved State Banner -->
+        <div v-if="savedDeployment" class="p-3 bg-green-900/30 border border-green-600 rounded-lg">
+          <div class="flex items-center gap-2 text-green-400 mb-2">
+            <CheckCircle class="w-5 h-5" />
+            <span class="font-medium">Deployment Saved Successfully!</span>
+          </div>
+          <p class="text-sm text-gray-300">Use the buttons below to copy deployment info, then click Clear to start a new deployment.</p>
+        </div>
+
         <!-- Actions (Centered, Bigger) -->
         <div class="flex gap-4 justify-center pt-3 border-t border-[#555555]">
+          <!-- Show Copy buttons after save OR when form is valid -->
           <Button
+            type="button"
             variant="secondary"
             size="lg"
             @click="handleCopyToJira"
-            :disabled="!isFormValid"
+            :disabled="!isFormValid && !savedDeployment"
           >
             <Copy class="w-5 h-5" />
             Copy to JIRA
           </Button>
           <Button
+            type="button"
             variant="secondary"
             size="lg"
             @click="handleCopyToTeams"
-            :disabled="!isFormValid"
+            :disabled="!isFormValid && !savedDeployment"
           >
             <Copy class="w-5 h-5" />
             Copy to Teams
           </Button>
+
+          <!-- Clear button - shown after save -->
           <Button
+            v-if="savedDeployment"
+            type="button"
+            variant="danger"
+            size="lg"
+            @click="resetForm"
+          >
+            <Eraser class="w-5 h-5" />
+            Clear
+          </Button>
+
+          <!-- Save button - hidden after save -->
+          <Button
+            v-else
             variant="success"
             size="lg"
             @click="handleSubmit"
-            :disabled="!isFormValid"
+            :disabled="!isFormValid || isSubmitting"
           >
             <Save class="w-5 h-5" />
-            Save Deployment
+            {{ isSubmitting ? 'Saving...' : 'Save Deployment' }}
           </Button>
         </div>
       </form>
@@ -203,9 +230,9 @@ import { useProjectsStore, type Component } from '../stores/projects'
 import { useDeploymentsStore } from '../stores/deployments'
 import { useSettingsStore } from '../stores/settings'
 import { useLibraryStore } from '../stores/library'
-import { useClipboard } from '../composables/useClipboard'
+import { useClipboard, type DeploymentData } from '../composables/useClipboard'
 import { useToast } from '../composables/useToast'
-import { Clock, Copy, Save } from 'lucide-vue-next'
+import { Clock, Copy, Save, Eraser, CheckCircle } from 'lucide-vue-next'
 
 const projectsStore = useProjectsStore()
 const deploymentsStore = useDeploymentsStore()
@@ -214,11 +241,22 @@ const libraryStore = useLibraryStore()
 const { copyToClipboard, formatForJira, formatForTeams } = useClipboard()
 const { success, error } = useToast()
 
+// Helper to get local datetime in format required by datetime-local input
+const getLocalDateTimeString = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
 const form = ref({
   project_id: '',
   component_id: '',
   jira_id: '',
-  timestamp: new Date().toISOString().slice(0, 16),
+  timestamp: getLocalDateTimeString(),
   database_script: false,
   database_script_name: '',
   build_status: 'success' as 'success' | 'failed',
@@ -238,6 +276,8 @@ const autoFilled = ref({
 })
 
 const selectedComponent = ref<Component | null>(null)
+const isSubmitting = ref(false)
+const savedDeployment = ref<DeploymentData | null>(null)  // Stores last saved deployment for copy operations
 
 const projectNames = computed(() =>
   projectsStore.projects.map(p => p.name || `Project ${p.id}`)
@@ -289,54 +329,66 @@ const handleComponentChange = () => {
 }
 
 const setCurrentTimestamp = () => {
-  form.value.timestamp = new Date().toISOString().slice(0, 16)
+  form.value.timestamp = getLocalDateTimeString()
+}
+
+// Build deployment data for copy operations
+const buildDeploymentData = (): DeploymentData => {
+  const project = projectsStore.projects.find(
+    p => (p.name || `Project ${p.id}`) === form.value.project_id
+  )
+  return {
+    patchId: form.value.jira_id || undefined,
+    project: form.value.project_id,
+    component: form.value.component_id,
+    environment: autoFilled.value.environment || project?.environment,
+    componentUrl: selectedComponent.value?.component_url,
+    buildServer: autoFilled.value.build_server || project?.build_server,
+    buildStatus: form.value.build_status,
+    vcsUrl: autoFilled.value.vcs_url || selectedComponent.value?.vcs_url,
+    deployServer: autoFilled.value.deploy_server || project?.deploy_server,
+    buildBackup: project?.backup_location,
+    databaseName: autoFilled.value.database_name || project?.database_name,
+    deployStatus: form.value.deploy_status,
+    databaseScript: form.value.database_script ? form.value.database_script_name : undefined,
+    developer: autoFilled.value.developer || selectedComponent.value?.developer,
+    deployedBy: form.value.deployed_by,
+    timestamp: form.value.timestamp,
+    notes: form.value.notes || undefined,
+  }
 }
 
 const handleCopyToJira = async () => {
-  if (!isFormValid.value) return
+  if (!isFormValid.value && !savedDeployment.value) return
 
-  const data = {
-    'JIRA ID': form.value.jira_id,
-    'Project': form.value.project_id,
-    'Component': form.value.component_id,
-    'Developer': autoFilled.value.developer,
-    'Timestamp': form.value.timestamp,
-    'Build Status': form.value.build_status,
-    'Deploy Status': form.value.deploy_status,
-    'Deployed By': form.value.deployed_by,
-  }
+  // Use saved data if available, otherwise build from current form
+  const data = savedDeployment.value || buildDeploymentData()
 
   const text = formatForJira(data)
   if (await copyToClipboard(text)) {
-    success('Copied to clipboard!')
+    success('Copied to clipboard for JIRA!')
   } else {
     error('Failed to copy to clipboard')
   }
 }
 
 const handleCopyToTeams = async () => {
-  if (!isFormValid.value) return
+  if (!isFormValid.value && !savedDeployment.value) return
 
-  const data = {
-    'JIRA ID': form.value.jira_id,
-    'Project': form.value.project_id,
-    'Component': form.value.component_id,
-    'Developer': autoFilled.value.developer,
-    'Timestamp': form.value.timestamp,
-    'Build Status': form.value.build_status,
-    'Deploy Status': form.value.deploy_status,
-    'Deployed By': form.value.deployed_by,
-  }
+  // Use saved data if available, otherwise build from current form
+  const data = savedDeployment.value || buildDeploymentData()
 
   const text = formatForTeams(data)
   if (await copyToClipboard(text)) {
-    success('Copied to clipboard!')
+    success('Copied to clipboard for Teams!')
   } else {
     error('Failed to copy to clipboard')
   }
 }
 
 const handleSubmit = async () => {
+  // Prevent double-clicks
+  if (isSubmitting.value) return
   if (!isFormValid.value) return
 
   if (!form.value.jira_id || form.value.jira_id.trim() === '') {
@@ -345,6 +397,8 @@ const handleSubmit = async () => {
     )
     if (!confirmed) return
   }
+
+  isSubmitting.value = true
 
   const project = projectsStore.projects.find(
     p => (p.name || `Project ${p.id}`) === form.value.project_id
@@ -368,12 +422,19 @@ const handleSubmit = async () => {
     deployed_by: form.value.deployed_by,
   }
 
-  const result = await deploymentsStore.createDeployment(deployment)
-  if (result) {
-    success('Deployment saved successfully!')
-    resetForm()
-  } else {
-    error('Failed to save deployment')
+  try {
+    const result = await deploymentsStore.createDeployment(deployment)
+    if (result) {
+      success('Deployment saved! Use Copy buttons or Clear to start new.')
+      // Store saved data for copy operations
+      savedDeployment.value = buildDeploymentData()
+      // Don't reset form - let user copy first
+    } else {
+      error('Failed to save deployment')
+      savedDeployment.value = null
+    }
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -382,7 +443,7 @@ const resetForm = () => {
     project_id: '',
     component_id: '',
     jira_id: '',
-    timestamp: new Date().toISOString().slice(0, 16),
+    timestamp: getLocalDateTimeString(),
     database_script: false,
     database_script_name: '',
     build_status: 'success',
@@ -390,6 +451,11 @@ const resetForm = () => {
     notes: '',
     deployed_by: settingsStore.settings?.default_deployed_by || 'Kannan',
   }
+  selectedComponent.value = null
+  savedDeployment.value = null  // Clear saved state
+  Object.keys(autoFilled.value).forEach(key => {
+    autoFilled.value[key as keyof typeof autoFilled.value] = ''
+  })
 }
 
 watch(() => form.value.component_id, () => {

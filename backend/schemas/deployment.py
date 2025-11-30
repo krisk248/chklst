@@ -67,6 +67,11 @@ class DeploymentListResponse(BaseModel):
     project_id: int
     component_id: Optional[int] = None  # Nullable for legacy data
     environment: Optional[str] = None
+    vcs_url: Optional[str] = None
+    build_server: Optional[str] = None
+    deploy_server: Optional[str] = None
+    database_name: Optional[str] = None
+    database_script: Optional[str] = None
     deploy_status: str
     deployed_by: Optional[str] = None
     developer_name: Optional[str] = None
